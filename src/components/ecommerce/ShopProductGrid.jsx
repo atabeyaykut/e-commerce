@@ -1,7 +1,7 @@
 import React from 'react';
-import ProductCard from './ProductCard';
+import ShopProductCard from './ShopProductCard';
 
-const ProductGrid = ({ title, className = "" }) => {
+const ShopProductGrid = ({ className = "" }) => {
   const products = [
     {
       id: 1,
@@ -79,16 +79,13 @@ const ProductGrid = ({ title, className = "" }) => {
 
   return (
     <div className={`w-full ${className}`}>
-      {title && (
-        <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-8">{title}</h2>
-      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ShopProductCard key={product.id} product={product} />
         ))}
       </div>
     </div>
   );
 };
 
-export default ProductGrid;
+export default ShopProductGrid;
