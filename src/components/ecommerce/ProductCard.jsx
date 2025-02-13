@@ -5,9 +5,9 @@ import { Heart, ShoppingCart } from 'lucide-react';
 const ProductCard = ({ product }) => {
   return (
     <div className="group">
-      <div className="relative overflow-hidden rounded-lg">
+      <div className="relative overflow-hidden rounded-lg h-[400px]">
         <Link to={`/product/${product.id}`}>
-          <div className="aspect-w-1 aspect-h-1 w-full">
+          <div className="w-full h-full">
             <img
               src={`https://picsum.photos/400`}
               alt={product.name}

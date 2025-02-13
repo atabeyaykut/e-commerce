@@ -6,8 +6,12 @@ import Categories from '../components/ui/Categories';
 import CategoryFilter from '../components/ui/CategoryFilter';
 import CategoryPick from '../components/ui/CategoryPick';
 import ProductGrid from '../components/ecommerce/ProductGrid';
-import CallToAction from '../components/ui/CallToAction';
+import BrandLogos from '../components/ui/BrandLogos';
 import FeaturedPosts from '../components/ui/FeaturedPosts';
+import BestsellerProducts from '../components/ui/BestsellerProducts';
+import MostPopular from '../components/ui/MostPopular';
+import FurnitureProducts from '../components/ui/FurnitureProducts';
+import PopularProduct from '../components/ui/PopularProduct';
 
 const HomePage = () => {
   const products = [
@@ -94,35 +98,23 @@ const HomePage = () => {
       {/* Categories */}
       <Categories />
 
-      {/* Best Selling Products */}
-      <section className="max-w-7xl mx-auto px-4 py-12">
-        <div className="bg-gray-50 py-12">
-          <CategoryFilter />
-          <ProductGrid
-            title="Best Selling Products"
-            products={products}
-          />
-        </div>
-      </section>
+      {/* Bestseller Products */}
+      <BestsellerProducts />
 
-      {/* Featured Products with Yellow Banner */}
-      <section className="bg-yellow-400">
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="flex flex-col md:flex-row items-center justify-between mb-12">
-            <div className="text-center md:text-left mb-8 md:mb-0 md:w-1/2">
-              <h2 className="text-3xl font-bold mb-4">Featured Products</h2>
-              <p className="text-xl">Get your favorite products at the best prices</p>
-            </div>
-            <div className="md:w-1/2">
-              <img src="/images/banners/featured.jpg" alt="Featured Products" className="rounded-lg shadow-lg" />
-            </div>
-          </div>
-          <ProductGrid products={featuredProducts} />
-        </div>
-      </section>
+      {/* Most Popular Products */}
+      <MostPopular />
 
-      {/* Call to Action */}
-      <CallToAction />
+      {/* Furniture Products */}
+      <FurnitureProducts />
+
+      {/* Popular Products */}
+      <PopularProduct />
+
+      {/* Product Grid */}
+      <ProductGrid />
+
+      {/* Brand Logos */}
+      <BrandLogos />
 
       {/* Featured Blog Posts */}
       <FeaturedPosts />

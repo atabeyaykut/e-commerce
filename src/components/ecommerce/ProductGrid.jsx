@@ -74,7 +74,8 @@ const ProductGrid = ({ title, className = "" }) => {
   ];
 
   return (
-    <div className={className}>
+    <div className="max-w-6xl mx-auto px-4 py-8">
+    
       {title && (
         <h2 className="text-2xl font-bold mb-8">{title}</h2>
       )}

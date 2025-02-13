@@ -1,86 +1,94 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Twitter } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-white">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Newsletter */}
-        <div className="py-12 border-b">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <h2 className="text-2xl font-bold mb-4 md:mb-0">Bandage</h2>
-            <div className="flex items-center space-x-4">
-              <a href="#" className="text-blue-600 hover:text-blue-700">
-                <Facebook className="w-6 h-6" />
-              </a>
-              <a href="#" className="text-blue-600 hover:text-blue-700">
-                <Instagram className="w-6 h-6" />
-              </a>
-              <a href="#" className="text-blue-600 hover:text-blue-700">
-                <Twitter className="w-6 h-6" />
-              </a>
-            </div>
+    <footer className="bg-[#1C1F2C] text-white py-16">
+      <div className="max-w-6xl mx-auto px-4">
+        {/* Header Section */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-2">Consulting Agency For Your Business</h2>
+          <p className="text-gray-400">the quick fox jumps over the lazy dog</p>
+        </div>
+
+        {/* Main Footer Content */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+          {/* Company Info */}
+          <div>
+            <h3 className="font-bold mb-4">Company Info</h3>
+            <ul className="space-y-3">
+              <li><a href="#" className="text-gray-400 hover:text-white">About Us</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white">Carrier</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white">We are hiring</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white">Blog</a></li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h3 className="font-bold mb-4">Legal</h3>
+            <ul className="space-y-3">
+              <li><a href="#" className="text-gray-400 hover:text-white">About Us</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white">Carrier</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white">We are hiring</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white">Blog</a></li>
+            </ul>
+          </div>
+
+          {/* Features */}
+          <div>
+            <h3 className="font-bold mb-4">Features</h3>
+            <ul className="space-y-3">
+              <li><a href="#" className="text-gray-400 hover:text-white">Business Marketing</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white">User Analytic</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white">Live Chat</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white">Unlimited Support</a></li>
+            </ul>
+          </div>
+
+          {/* Resources */}
+          <div>
+            <h3 className="font-bold mb-4">Resources</h3>
+            <ul className="space-y-3">
+              <li><a href="#" className="text-gray-400 hover:text-white">iOS & Android</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white">Watch a Demo</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white">Customers</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white">API</a></li>
+            </ul>
           </div>
         </div>
 
-        {/* Links */}
-        <div className="py-12 grid grid-cols-1 md:grid-cols-5 gap-8">
-          <div className="space-y-3">
-            <h3 className="font-bold text-gray-900 mb-4">Company Info</h3>
-            <Link to="/" className="block text-gray-600 hover:text-gray-900">About Us</Link>
-            <Link to="/" className="block text-gray-600 hover:text-gray-900">Carrier</Link>
-            <Link to="/" className="block text-gray-600 hover:text-gray-900">We are hiring</Link>
-            <Link to="/" className="block text-gray-600 hover:text-gray-900">Blog</Link>
-          </div>
-
-          <div className="space-y-3">
-            <h3 className="font-bold text-gray-900 mb-4">Legal</h3>
-            <Link to="/" className="block text-gray-600 hover:text-gray-900">About Us</Link>
-            <Link to="/" className="block text-gray-600 hover:text-gray-900">Carrier</Link>
-            <Link to="/" className="block text-gray-600 hover:text-gray-900">We are hiring</Link>
-            <Link to="/" className="block text-gray-600 hover:text-gray-900">Blog</Link>
-          </div>
-
-          <div className="space-y-3">
-            <h3 className="font-bold text-gray-900 mb-4">Features</h3>
-            <Link to="/" className="block text-gray-600 hover:text-gray-900">Business Marketing</Link>
-            <Link to="/" className="block text-gray-600 hover:text-gray-900">User Analytic</Link>
-            <Link to="/" className="block text-gray-600 hover:text-gray-900">Live Chat</Link>
-            <Link to="/" className="block text-gray-600 hover:text-gray-900">Unlimited Support</Link>
-          </div>
-
-          <div className="space-y-3">
-            <h3 className="font-bold text-gray-900 mb-4">Resources</h3>
-            <Link to="/" className="block text-gray-600 hover:text-gray-900">IOS & Android</Link>
-            <Link to="/" className="block text-gray-600 hover:text-gray-900">Watch a Demo</Link>
-            <Link to="/" className="block text-gray-600 hover:text-gray-900">Customers</Link>
-            <Link to="/" className="block text-gray-600 hover:text-gray-900">API</Link>
-          </div>
-
-          <div className="space-y-3">
-            <h3 className="font-bold text-gray-900 mb-4">Get In Touch</h3>
-            <div className="flex items-center space-x-2">
-              <input
-                type="email"
-                placeholder="Your Email"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                Subscribe
-              </button>
+        {/* Contact Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center py-8 border-t border-gray-700">
+          <div className="flex flex-col space-y-2 mb-4 md:mb-0">
+            <div className="flex items-center">
+              <span className="text-gray-400 mr-2">(480) 555-0103</span>
             </div>
-            <p className="text-gray-600 text-sm">
-              Lore imp sum dolor Amit
-            </p>
+            <div className="flex items-center">
+              <span className="text-gray-400 mr-2">4517 Washington Ave.</span>
+            </div>
+            <div className="flex items-center">
+              <span className="text-gray-400">debra.holt@example.com</span>
+            </div>
+          </div>
+
+          {/* Social Media Links */}
+          <div className="flex space-x-4">
+            <a href="#" className="text-blue-400 hover:text-blue-300">
+              <Facebook size={24} />
+            </a>
+            <a href="#" className="text-blue-400 hover:text-blue-300">
+              <Instagram size={24} />
+            </a>
+            <a href="#" className="text-blue-400 hover:text-blue-300">
+              <Twitter size={24} />
+            </a>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="py-6 border-t">
-          <p className="text-gray-600 text-center">
-            Made With Love By Finland All Right Reserved
-          </p>
+        {/* Copyright */}
+        <div className="text-center text-gray-400 mt-8">
+          Made With Love By Finland All Right Reserved
         </div>
       </div>
     </footer>

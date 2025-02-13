@@ -2,28 +2,42 @@ import React from 'react';
 
 const BrandLogos = () => {
   const brands = [
-    { id: 1, name: 'Hooli', logo: '/images/brands/hooli.png' },
-    { id: 2, name: 'Lyft', logo: '/images/brands/lyft.png' },
-    { id: 3, name: 'Pied Piper', logo: '/images/brands/piper.png' },
-    { id: 4, name: 'Stripe', logo: '/images/brands/stripe.png' },
-    { id: 5, name: 'AWS', logo: '/images/brands/aws.png' },
+    {
+      name: 'Brand 1',
+      logo: 'https://picsum.photos/100/50?random=1',
+    },
+    {
+      name: 'Brand 2',
+      logo: 'https://picsum.photos/100/50?random=2',
+    },
+    {
+      name: 'Brand 3',
+      logo: 'https://picsum.photos/100/50?random=3',
+    },
+    {
+      name: 'Brand 4',
+      logo: 'https://picsum.photos/100/50?random=4',
+    },
+    {
+      name: 'Brand 5',
+      logo: 'https://picsum.photos/100/50?random=5',
+    }
   ];
 
   return (
-    <section className="bg-gray-50 py-12">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-3 md:grid-cols-5 gap-8 items-center justify-items-center">
-          {brands.map((brand) => (
+    <div className="max-w-6xl mx-auto px-4 py-12">
+      <div className="flex justify-between items-center">
+        {brands.map((brand, index) => (
+          <div key={index} className="grayscale hover:grayscale-0 transition-all duration-300">
             <img
-              key={brand.id}
               src={brand.logo}
               alt={brand.name}
-              className="h-8 object-contain grayscale hover:grayscale-0 transition-all"
+              className="h-40 w-auto object-contain"
             />
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
-    </section>
+    </div>
   );
 };
 

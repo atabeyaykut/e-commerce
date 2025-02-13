@@ -1,9 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ShoppingCart, Heart, Menu, X, Phone, Mail } from 'lucide-react';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
+  const timeoutRef = useRef(null);
+
+  const shopCategories = {
+    women: ['Bags', 'Belts', 'Cosmetics', 'Bags', 'Hats'],
+    men: ['Bags', 'Belts', 'Cosmetics', 'Bags', 'Hats']
+  };
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    setIsShopDropdownOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsShopDropdownOpen(false);
+    }, 100);
+  };
 
   return (
     <header className="bg-white">
@@ -57,9 +77,55 @@ const Header = () => {
               <Link to="/" className="text-gray-900 hover:text-blue-600">
                 Home
               </Link>
-              <Link to="/" className="text-gray-600 hover:text-blue-600">
-                Shop
-              </Link>
+              <div className="relative">
+                <button
+                  className="text-gray-600 hover:text-blue-600"
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  Shop
+                </button>
+                {isShopDropdownOpen && (
+                  <div
+                    className="absolute top-full left-0 mt-2 w-96 bg-white shadow-lg rounded-md py-2 z-50"
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    <div className="grid grid-cols-2 gap-4 p-4">
+                      <div>
+                        <h3 className="font-semibold text-lg mb-2">Kadın</h3>
+                        <ul className="space-y-2">
+                          {shopCategories.women.map((category, index) => (
+                            <li key={index}>
+                              <Link
+                                to={`/shop/women/${category.toLowerCase()}`}
+                                className="text-gray-600 hover:text-blue-600 block"
+                              >
+                                {category}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg mb-2">Erkek</h3>
+                        <ul className="space-y-2">
+                          {shopCategories.men.map((category, index) => (
+                            <li key={index}>
+                              <Link
+                                to={`/shop/men/${category.toLowerCase()}`}
+                                className="text-gray-600 hover:text-blue-600 block"
+                              >
+                                {category}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
               <Link to="/" className="text-gray-600 hover:text-blue-600">
                 About
               </Link>
@@ -107,50 +173,38 @@ const Header = () => {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden">
-          <nav className="px-4 pt-2 pb-4 space-y-2">
+          <div className="px-2 pt-2 pb-3 space-y-1">
             <Link
               to="/"
-              className="block px-3 py-2 text-gray-600 hover:text-blue-600"
-              onClick={() => setIsMenuOpen(false)}
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               Home
             </Link>
             <Link
               to="/"
-              className="block px-3 py-2 text-gray-600 hover:text-blue-600"
-              onClick={() => setIsMenuOpen(false)}
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               Shop
             </Link>
             <Link
               to="/"
-              className="block px-3 py-2 text-gray-600 hover:text-blue-600"
-              onClick={() => setIsMenuOpen(false)}
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               About
             </Link>
             <Link
               to="/"
-              className="block px-3 py-2 text-gray-600 hover:text-blue-600"
-              onClick={() => setIsMenuOpen(false)}
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               Blog
             </Link>
             <Link
               to="/"
-              className="block px-3 py-2 text-gray-600 hover:text-blue-600"
-              onClick={() => setIsMenuOpen(false)}
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               Contact
             </Link>
-            <Link
-              to="/"
-              className="block px-3 py-2 text-blue-600 hover:text-blue-700"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Login / Register
-            </Link>
-          </nav>
+          </div>
         </div>
       )}
     </header>
