@@ -14,7 +14,7 @@ const ShopProductGrid = ({ className = "" }) => {
 
   return (
     <div className={`w-full ${className}`}>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
         {products.map((product) => (
           <ShopProductCard key={product.id} product={product} />
         ))}

@@ -65,7 +65,7 @@ const ShopPage = () => {
       <PageHeader title="Shop" breadcrumbs={breadcrumbs} />
       
       {/* Header with Categories */}
-      <div className="grid grid-cols-5 gap-4 max-w-9/11 mx-auto px-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-9/11 mx-auto px-4">
         {categories.map((category) => (
           <div key={category.id} className="relative group cursor-pointer">
             <div className="aspect-[1/1] overflow-hidden h-full w-full">
@@ -75,8 +75,8 @@ const ShopPage = () => {
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white">
-                <h3 className="text-xl font-bold">{category.title}</h3>
-                <p className="mt-2 text-sm">{category.items}</p>
+                <h3 className="text-base md:text-xl font-bold">{category.title}</h3>
+                <p className="mt-2 text-xs md:text-sm">{category.items}</p>
               </div>
             </div>
           </div>
@@ -86,8 +86,8 @@ const ShopPage = () => {
       {/* Shop Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Filter Bar */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 md:gap-0">
+          <div className="flex items-center justify-between md:justify-start gap-4">
             <span className="text-sm text-gray-500">Showing all 20 results</span>
             <div className="flex items-center gap-2">
               <button
@@ -104,14 +104,14 @@ const ShopPage = () => {
               </button>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <select className="border rounded-md px-3 py-2 text-sm">
+          <div className="flex items-center justify-between md:justify-end gap-4">
+            <select className="w-full md:w-auto border rounded-md px-3 py-2 text-sm">
               <option>Popularity</option>
               <option>Latest</option>
               <option>Price: Low to High</option>
               <option>Price: High to Low</option>
             </select>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm">
+            <button className="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded-md text-sm">
               Filter
             </button>
           </div>
@@ -126,28 +126,28 @@ const ShopPage = () => {
         <div className="flex justify-center mt-8">
           <div className="inline-flex rounded-lg overflow-hidden">
             <button 
-              className="px-6 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 border-r border-gray-300"
+              className="px-4 md:px-6 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 border-r border-gray-300 text-sm md:text-base"
               onClick={() => setCurrentPage(1)}
             >
               First
             </button>
             <button 
-              className="px-6 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 border-r border-gray-300"
+              className="px-4 md:px-6 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 border-r border-gray-300 text-sm md:text-base"
             >
               1
             </button>
             <button 
-              className="px-6 py-2 bg-blue-500 text-white"
+              className="px-4 md:px-6 py-2 bg-blue-500 text-white text-sm md:text-base"
             >
               2
             </button>
             <button 
-              className="px-6 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 border-l border-gray-300"
+              className="px-4 md:px-6 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 border-l border-gray-300 text-sm md:text-base"
             >
               3
             </button>
             <button 
-              className="px-6 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 border-l border-gray-300"
+              className="px-4 md:px-6 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 border-l border-gray-300 text-sm md:text-base"
             >
               Next
             </button>
