@@ -93,31 +93,65 @@ const HomePage = () => {
   return (
     <div className="flex flex-col">
       {/* Hero Slider */}
-      <HeroSlider />
+      <div className="mb-12">
+        <HeroSlider />
+      </div>
 
       {/* Categories */}
-      <Categories />
+      <div className="mb-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <Categories />
+        </div>
+      </div>
 
       {/* Bestseller Products */}
-      <BestsellerProducts />
+      <div className="mb-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <BestsellerProducts />
+        </div>
+      </div>
 
       {/* Most Popular Products */}
-      <MostPopular />
+      <div className="mb-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <MostPopular />
+        </div>
+      </div>
 
       {/* Furniture Products */}
-      <FurnitureProducts />
+      <div className="mb-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <FurnitureProducts />
+        </div>
+      </div>
 
       {/* Popular Products */}
-      <PopularProduct />
+      <div className="mb-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <PopularProduct />
+        </div>
+      </div>
 
       {/* Product Grid */}
-      <ProductGrid />
+      <div className="mb-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <ProductGrid />
+        </div>
+      </div>
 
       {/* Brand Logos */}
-      <BrandLogos />
+      <div className="mb-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <BrandLogos />
+        </div>
+      </div>
 
       {/* Featured Blog Posts */}
-      <FeaturedPosts />
+      <div className="mb-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <FeaturedPosts />
+        </div>
+      </div>
     </div>
   );
 };
