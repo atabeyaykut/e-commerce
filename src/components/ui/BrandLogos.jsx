@@ -26,7 +26,7 @@ const BrandLogos = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between space-x-4 items-center">
         {brands.map((brand, index) => (
           <div key={index} className="grayscale hover:grayscale-0 transition-all duration-300">
             <img
