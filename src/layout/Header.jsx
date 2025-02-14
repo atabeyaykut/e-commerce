@@ -1,16 +1,17 @@
 import React, { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import { Search, ShoppingCart, Heart, Menu, X, Phone, Mail } from 'lucide-react';
+import { getGravatarUrl } from '../utils/gravatar';
+import { logout } from '../store/actions/authActions';
 
 const Header = () => {
+  const { user } = useSelector(state => state.auth);
+  const dispatch = useDispatch();
+  const history = useHistory();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
   const timeoutRef = useRef(null);
-
-  const shopCategories = {
-    women: ['Bags', 'Belts', 'Cosmetics', 'Bags', 'Hats'],
-    men: ['Bags', 'Belts', 'Cosmetics', 'Bags', 'Hats']
-  };
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) {
@@ -25,8 +26,15 @@ const Header = () => {
     }, 100);
   };
 
+  const handleLogout = () => {
+    dispatch(logout());
+    history.push('/');
+  };
+
+  console.log('Current user:', user); // Debug için
+
   return (
-    <header className="bg-white">
+    <header className="bg-white shadow-sm">
       {/* Top Bar */}
       <div className="bg-gray-100">
         <div className="max-w-7xl mx-auto px-4">
@@ -139,24 +147,41 @@ const Header = () => {
 
             {/* Right Side */}
             <div className="flex items-center space-x-6">
-              <div className="hidden md:flex items-center">
-                <Link to="/login" className="text-blue-600 hover:text-blue-700">Login</Link>
-                <span className="mx-2 text-gray-400">/</span>
-                <Link to="/signup" className="text-blue-600 hover:text-blue-700">Register</Link>
-              </div>
+              {user ? (
+                <div className="flex items-center space-x-4">
+                  <img
+                    src={getGravatarUrl(user.email)}
+                    alt={user.name}
+                    className="h-8 w-8 rounded-full"
+                  />
+                  <span className="text-gray-700">{user.name}</span>
+                  <button
+                    onClick={handleLogout}
+                    className="text-blue-600 hover:text-red-600"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="hidden md:flex items-center">
+                  <Link to="/login" className="text-blue-600 hover:text-blue-700">Login</Link>
+                  <span className="mx-2 text-gray-400">/</span>
+                  <Link to="/signup" className="text-blue-600 hover:text-blue-700">Register</Link>
+                </div>
+              )}
               <button className="text-gray-600 hover:text-blue-600">
                 <Search className="w-5 h-5" />
               </button>
               <Link to="/cart" className="text-gray-600 hover:text-blue-600 relative">
                 <ShoppingCart className="w-5 h-5" />
                 <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  1
+                  0
                 </span>
               </Link>
               <Link to="/wishlist" className="text-gray-600 hover:text-blue-600 relative">
                 <Heart className="w-5 h-5" />
                 <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  1
+                  0
                 </span>
               </Link>
               <button
@@ -209,6 +234,11 @@ const Header = () => {
       )}
     </header>
   );
+};
+
+const shopCategories = {
+  women: ['Bags', 'Belts', 'Cosmetics', 'Bags', 'Hats'],
+  men: ['Bags', 'Belts', 'Cosmetics', 'Bags', 'Hats']
 };
 
 export default Header;

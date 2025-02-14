@@ -1,6 +1,10 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Route, Switch, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+import { Provider } from 'react-redux';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import store from './store';
 import Header from './layout/Header';
 import Footer from './layout/Footer';
 import AnimatedPage from './components/ui/AnimatedPage';
@@ -13,6 +17,7 @@ const TeamPage = lazy(() => import('./pages/TeamPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -72,6 +77,11 @@ function AnimatedRoutes() {
             <SignupPage />
           </AnimatedPage>
         </Route>
+        <Route exact path="/login">
+          <AnimatedPage>
+            <LoginPage />
+          </AnimatedPage>
+        </Route>
       </Switch>
     </AnimatePresence>
   );
@@ -79,17 +89,31 @@ function AnimatedRoutes() {
 
 function App() {
   return (
-    <Router>
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-grow">
-          <Suspense fallback={<LoadingSpinner />}>
-            <AnimatedRoutes />
-          </Suspense>
-        </main>
-        <Footer />
-      </div>
-    </Router>
+    <Provider store={store}>
+      <Router>
+        <div className="flex flex-col min-h-screen">
+          <Header />
+          <main className="flex-grow">
+            <Suspense fallback={<LoadingSpinner />}>
+              <AnimatedRoutes />
+            </Suspense>
+          </main>
+          <Footer />
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
+        </div>
+      </Router>
+    </Provider>
   );
 }
 
