@@ -78,13 +78,13 @@ const Header = () => {
                 Home
               </Link>
               <div className="relative">
-                <button
-                  className="text-gray-600 hover:text-blue-600"
+              <Link to="/shop"
+                  className="text-gray-600 cursor-pointer hover:text-blue-600"
                   onMouseEnter={handleMouseEnter}
                   onMouseLeave={handleMouseLeave}
                 >
                   Shop
-                </button>
+                  </Link>
                 {isShopDropdownOpen && (
                   <div
                     className="absolute top-full left-0 mt-2 w-96 bg-white shadow-lg rounded-md py-2 z-50"
@@ -126,20 +126,20 @@ const Header = () => {
                   </div>
                 )}
               </div>
-              <Link to="/" className="text-gray-600 hover:text-blue-600">
+              <Link to="/about" className="text-gray-600 hover:text-blue-600">
                 About
               </Link>
-              <Link to="/" className="text-gray-600 hover:text-blue-600">
-                Blog
+              <Link to="/team" className="text-gray-600 hover:text-blue-600">
+                Team
               </Link>
-              <Link to="/" className="text-gray-600 hover:text-blue-600">
+              <Link to="/contact" className="text-gray-600 hover:text-blue-600">
                 Contact
               </Link>
             </nav>
 
             {/* Right Side */}
             <div className="flex items-center space-x-6">
-              <Link to="/" className="hidden md:flex items-center text-blue-600 hover:text-blue-700">
+              <Link to="/login" className="hidden md:flex items-center text-blue-600 hover:text-blue-700">
                 <span className="mr-1">Login</span>
                 <span className="text-gray-400">/</span>
                 <span className="ml-1">Register</span>
@@ -147,13 +147,13 @@ const Header = () => {
               <button className="text-gray-600 hover:text-blue-600">
                 <Search className="w-5 h-5" />
               </button>
-              <Link to="/" className="text-gray-600 hover:text-blue-600 relative">
+              <Link to="/cart" className="text-gray-600 hover:text-blue-600 relative">
                 <ShoppingCart className="w-5 h-5" />
                 <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                   1
                 </span>
               </Link>
-              <Link to="/" className="text-gray-600 hover:text-blue-600 relative">
+              <Link to="/wishlist" className="text-gray-600 hover:text-blue-600 relative">
                 <Heart className="w-5 h-5" />
                 <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                   1
@@ -181,25 +181,25 @@ const Header = () => {
               Home
             </Link>
             <Link
-              to="/"
+              to="/shop"
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               Shop
             </Link>
             <Link
-              to="/"
+              to="/about"
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               About
             </Link>
             <Link
-              to="/"
+              to="/team"
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
-              Blog
+              Team
             </Link>
             <Link
-              to="/"
+              to="/contact"
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               Contact
