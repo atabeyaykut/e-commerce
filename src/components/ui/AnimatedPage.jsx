@@ -4,24 +4,39 @@ import { motion } from 'framer-motion';
 const pageVariants = {
   initial: {
     opacity: 0,
-    x: 200
+    y: 20,
+    scale: 0.95
   },
   animate: {
     opacity: 1,
-    x: 0,
+    y: 0,
+    scale: 1,
     transition: {
-      type: "spring",
-      damping: 20,
-      stiffness: 100
+      duration: 0.4,
+      ease: [0.4, 0, 0.2, 1],
+      scale: {
+        type: "spring",
+        damping: 15,
+        stiffness: 100,
+        restDelta: 0.001
+      }
     }
   },
   exit: {
     opacity: 0,
-    x: -200,
+    y: -20,
+    scale: 0.95,
     transition: {
-      duration: 0.2
+      duration: 0.3,
+      ease: [0.4, 0, 1, 1]
     }
   }
+};
+
+const pageTransition = {
+  type: "tween",
+  ease: "anticipate",
+  duration: 0.4
 };
 
 const AnimatedPage = ({ children }) => {
@@ -31,6 +46,8 @@ const AnimatedPage = ({ children }) => {
       animate="animate"
       exit="exit"
       variants={pageVariants}
+      transition={pageTransition}
+      className="w-full"
     >
       {children}
     </motion.div>

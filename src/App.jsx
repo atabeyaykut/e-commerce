@@ -1,23 +1,23 @@
-import React, { Suspense, lazy } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Switch, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
-import { Provider } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
+import { AnimatePresence } from 'framer-motion';
 import 'react-toastify/dist/ReactToastify.css';
-import store from './store';
+
 import Header from './layout/Header';
 import Footer from './layout/Footer';
 import AnimatedPage from './components/ui/AnimatedPage';
+import useAuthStore from './store/authStore';
 
 // Lazy loaded components
-const HomePage = lazy(() => import('./pages/HomePage'));
-const ShopPage = lazy(() => import('./pages/ShopPage'));
-const ContactPage = lazy(() => import('./pages/ContactPage'));
-const TeamPage = lazy(() => import('./pages/TeamPage'));
-const AboutPage = lazy(() => import('./pages/AboutPage'));
-const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
-const SignupPage = lazy(() => import('./pages/SignupPage'));
-const LoginPage = lazy(() => import('./pages/LoginPage'));
+const HomePage = React.lazy(() => import('./pages/HomePage'));
+const ShopPage = React.lazy(() => import('./pages/ShopPage'));
+const ContactPage = React.lazy(() => import('./pages/ContactPage'));
+const TeamPage = React.lazy(() => import('./pages/TeamPage'));
+const AboutPage = React.lazy(() => import('./pages/AboutPage'));
+const ProductDetailPage = React.lazy(() => import('./pages/ProductDetailPage'));
+const SignupPage = React.lazy(() => import('./pages/SignupPage'));
+const LoginPage = React.lazy(() => import('./pages/LoginPage'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -28,7 +28,7 @@ const LoadingSpinner = () => (
 
 function AnimatedRoutes() {
   const location = useLocation();
-  
+
   return (
     <AnimatePresence mode="wait">
       <Switch location={location} key={location.pathname}>
@@ -88,32 +88,35 @@ function AnimatedRoutes() {
 }
 
 function App() {
+  const { initAuth } = useAuthStore();
+
+  useEffect(() => {
+    initAuth();
+  }, [initAuth]);
+
   return (
-    <Provider store={store}>
-      <Router>
-        <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-grow">
-            <Suspense fallback={<LoadingSpinner />}>
-              <AnimatedRoutes />
-            </Suspense>
-          </main>
-          <Footer />
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-          />
-        </div>
-      </Router>
-    </Provider>
+    <Router>
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow">
+          <React.Suspense fallback={<LoadingSpinner />}>
+            <AnimatedRoutes />
+          </React.Suspense>
+        </main>
+        <Footer />
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+      </div>
+    </Router>
   );
 }
 

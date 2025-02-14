@@ -1,13 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import useAuthStore from '../store/authStore';
 import { Search, ShoppingCart, Heart, Menu, X, Phone, Mail } from 'lucide-react';
 import { getGravatarUrl } from '../utils/gravatar';
-import { logout } from '../store/actions/authActions';
 
 const Header = () => {
-  const { user } = useSelector(state => state.auth);
-  const dispatch = useDispatch();
+  const { user, logout } = useAuthStore();
   const history = useHistory();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
@@ -27,11 +25,9 @@ const Header = () => {
   };
 
   const handleLogout = () => {
-    dispatch(logout());
+    logout();
     history.push('/');
   };
-
-  console.log('Current user:', user); // Debug için
 
   return (
     <header className="bg-white shadow-sm">
@@ -77,7 +73,7 @@ const Header = () => {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link to="/" className="text-2xl font-bold">
-              Bandage
+              E-Commerce
             </Link>
 
             {/* Desktop Navigation */}
