@@ -11,6 +11,7 @@ const ShopPage = lazy(() => import('./pages/ShopPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const TeamPage = lazy(() => import('./pages/TeamPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -58,6 +59,11 @@ const AnimatedRoutes = () => {
         <Route exact path="/about">
           <AnimatedPage>
             <AboutPage />
+          </AnimatedPage>
+        </Route>
+        <Route exact path="/product/:id">
+          <AnimatedPage>
+            <ProductDetailPage />
           </AnimatedPage>
         </Route>
       </Switch>
