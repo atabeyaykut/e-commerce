@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useHistory, useLocation, Link } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
@@ -28,6 +28,13 @@ const LoginPage = () => {
       history.replace(from);
     }
   };
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 120, // 7.5rem = 120px
+      behavior: 'smooth'
+    });
+  }, []);
 
   return (
     <div className="flex min-h-screen">
