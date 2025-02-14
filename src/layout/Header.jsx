@@ -157,7 +157,7 @@ const Header = () => {
                   <span className="text-gray-700">{user.name}</span>
                   <button
                     onClick={handleLogout}
-                    className="text-blue-600 hover:text-red-600"
+                    className="text-blue-600 cursor-pointer hover:text-red-600"
                   >
                     Logout
                   </button>

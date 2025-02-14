@@ -57,7 +57,7 @@ export const login = (credentials) => async (dispatch) => {
       payload: userData
     });
 
-    toast.success('Successfully logged in!');
+    toast.success('Successfully logged in!', { autoClose: 2000 });
     return true;
   } catch (error) {
     console.error('Login error details:', {
