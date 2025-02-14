@@ -48,6 +48,13 @@ const SignupPage = () => {
     fetchRoles();
   }, [setValue]);
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 120, // 7.5rem = 120px
+      behavior: 'smooth'
+    });
+  }, []);
+
   const onSubmit = async (data) => {
     setLoading(true);
     setError('');
@@ -239,7 +246,7 @@ const SignupPage = () => {
                 {selectedRole === '3' && (
                   <div className="space-y-4 mt-4 p-4 bg-gray-50 rounded-md">
                     <h3 className="text-lg font-medium text-gray-900">Store Information</h3>
-                    
+
                     {/* Store Name */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
@@ -329,11 +336,10 @@ const SignupPage = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-                    loading
-                      ? 'bg-blue-400 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-                  }`}
+                  className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${loading
+                    ? 'bg-blue-400 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                    }`}
                 >
                   {loading ? 'Creating Account...' : 'Create Account'}
                 </button>
