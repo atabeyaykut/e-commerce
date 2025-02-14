@@ -1,7 +1,9 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import Header from './layout/Header';
 import Footer from './layout/Footer';
+import AnimatedPage from './components/ui/AnimatedPage';
 
 // Lazy loaded pages
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -17,6 +19,52 @@ const LoadingSpinner = () => (
   </div>
 );
 
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  
+  return (
+    <AnimatePresence mode="wait">
+      <Switch location={location} key={location.pathname}>
+        <Route exact path="/">
+          <AnimatedPage>
+            <HomePage />
+          </AnimatedPage>
+        </Route>
+        <Route exact path="/shop">
+          <AnimatedPage>
+            <ShopPage />
+          </AnimatedPage>
+        </Route>
+        <Route exact path="/shop/:category">
+          <AnimatedPage>
+            <ShopPage />
+          </AnimatedPage>
+        </Route>
+        <Route exact path="/shop/:gender/:category">
+          <AnimatedPage>
+            <ShopPage />
+          </AnimatedPage>
+        </Route>
+        <Route exact path="/contact">
+          <AnimatedPage>
+            <ContactPage />
+          </AnimatedPage>
+        </Route>
+        <Route exact path="/team">
+          <AnimatedPage>
+            <TeamPage />
+          </AnimatedPage>
+        </Route>
+        <Route exact path="/about">
+          <AnimatedPage>
+            <AboutPage />
+          </AnimatedPage>
+        </Route>
+      </Switch>
+    </AnimatePresence>
+  );
+};
+
 function App() {
   return (
     <Router>
@@ -24,15 +72,7 @@ function App() {
         <Header />
         <main className="flex-grow">
           <Suspense fallback={<LoadingSpinner />}>
-            <Switch>
-              <Route exact path="/" component={HomePage} />
-              <Route exact path="/shop" component={ShopPage} />
-              <Route exact path="/shop/:category" component={ShopPage} />
-              <Route exact path="/shop/:gender/:category" component={ShopPage} />
-              <Route exact path="/contact" component={ContactPage} />
-              <Route exact path="/team" component={TeamPage} />
-              <Route exact path="/about" component={AboutPage} />
-            </Switch>
+            <AnimatedRoutes />
           </Suspense>
         </main>
         <Footer />
