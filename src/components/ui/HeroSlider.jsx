@@ -44,8 +44,8 @@ const HeroSlider = () => {
     <Slider {...settings}>
       {slides.map((slide) => (
         <div key={slide.id}>
-          <div 
-            className="relative h-[600px] bg-cover bg-center" 
+          <div
+            className="relative h-[650px] bg-cover bg-center"
             style={{ backgroundImage: `url(${slide.image})` }}
           >
             <div className="absolute inset-0 bg-black bg-opacity-40" />
