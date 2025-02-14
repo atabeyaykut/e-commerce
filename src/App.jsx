@@ -5,22 +5,23 @@ import Header from './layout/Header';
 import Footer from './layout/Footer';
 import AnimatedPage from './components/ui/AnimatedPage';
 
-// Lazy loaded pages
+// Lazy loaded components
 const HomePage = lazy(() => import('./pages/HomePage'));
 const ShopPage = lazy(() => import('./pages/ShopPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const TeamPage = lazy(() => import('./pages/TeamPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
 
 // Loading component
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600"></div>
+    <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
   </div>
 );
 
-const AnimatedRoutes = () => {
+function AnimatedRoutes() {
   const location = useLocation();
   
   return (
@@ -66,10 +67,15 @@ const AnimatedRoutes = () => {
             <ProductDetailPage />
           </AnimatedPage>
         </Route>
+        <Route exact path="/signup">
+          <AnimatedPage>
+            <SignupPage />
+          </AnimatedPage>
+        </Route>
       </Switch>
     </AnimatePresence>
   );
-};
+}
 
 function App() {
   return (
