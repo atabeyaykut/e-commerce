@@ -139,11 +139,11 @@ const Header = () => {
 
             {/* Right Side */}
             <div className="flex items-center space-x-6">
-              <Link to="/login" className="hidden md:flex items-center text-blue-600 hover:text-blue-700">
-                <span className="mr-1">Login</span>
-                <span className="text-gray-400">/</span>
-                <span className="ml-1">Register</span>
-              </Link>
+              <div className="hidden md:flex items-center">
+                <Link to="/login" className="text-blue-600 hover:text-blue-700">Login</Link>
+                <span className="mx-2 text-gray-400">/</span>
+                <Link to="/signup" className="text-blue-600 hover:text-blue-700">Register</Link>
+              </div>
               <button className="text-gray-600 hover:text-blue-600">
                 <Search className="w-5 h-5" />
               </button>

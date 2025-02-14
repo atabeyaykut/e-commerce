@@ -34,7 +34,7 @@ const SignupPage = () => {
       try {
         const response = await api.get('/roles');
         setRoles(response.data);
-        
+
         // Find customer role and set it as default
         const customerRole = response.data.find(role => role.name.toLowerCase() === 'customer');
         if (customerRole) {
@@ -71,7 +71,7 @@ const SignupPage = () => {
       }
 
       await api.post('/signup', formData);
-      
+
       // Redirect with success message using state
       history.goBack();
       // Add message to localStorage for displaying after redirect
@@ -84,9 +84,9 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-full bg-gray-50 flex flex-col justify-center  py-24 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <h2 className="text-center text-3xl font-extrabold text-gray-900">
           Create your account
         </h2>
       </div>
@@ -108,7 +108,7 @@ const SignupPage = () => {
               <div className="mt-1">
                 <input
                   type="text"
-                  {...register('name', { 
+                  {...register('name', {
                     required: 'Name is required',
                     minLength: {
                       value: 3,
