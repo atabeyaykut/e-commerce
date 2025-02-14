@@ -1,93 +1,94 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { BrowserRouter as Router, Route, Switch, useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { AnimatePresence } from 'framer-motion';
 import 'react-toastify/dist/ReactToastify.css';
 
+// Components that are part of the main layout should not be lazy loaded
 import Header from './layout/Header';
 import Footer from './layout/Footer';
-import AnimatedPage from './components/ui/AnimatedPage';
 import useAuthStore from './store/authStore';
 
-// Lazy loaded components
-const HomePage = React.lazy(() => import('./pages/HomePage'));
-const ShopPage = React.lazy(() => import('./pages/ShopPage'));
-const ContactPage = React.lazy(() => import('./pages/ContactPage'));
-const TeamPage = React.lazy(() => import('./pages/TeamPage'));
-const AboutPage = React.lazy(() => import('./pages/AboutPage'));
-const ProductDetailPage = React.lazy(() => import('./pages/ProductDetailPage'));
-const SignupPage = React.lazy(() => import('./pages/SignupPage'));
-const LoginPage = React.lazy(() => import('./pages/LoginPage'));
-
-// Loading component
+// Loading component with reduced motion
 const LoadingSpinner = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+  <div className="flex items-center justify-center min-h-[50vh]">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
   </div>
 );
 
-function AnimatedRoutes() {
+// Lazy load components with descriptive chunk names
+const HomePage = React.lazy(() => import(/* webpackChunkName: "home" */ './pages/HomePage'));
+const ShopPage = React.lazy(() => import(/* webpackChunkName: "shop" */ './pages/ShopPage'));
+const ContactPage = React.lazy(() => import(/* webpackChunkName: "contact" */ './pages/ContactPage'));
+const TeamPage = React.lazy(() => import(/* webpackChunkName: "team" */ './pages/TeamPage'));
+const AboutPage = React.lazy(() => import(/* webpackChunkName: "about" */ './pages/AboutPage'));
+const ProductDetailPage = React.lazy(() => import(/* webpackChunkName: "product" */ './pages/ProductDetailPage'));
+const SignupPage = React.lazy(() => import(/* webpackChunkName: "auth" */ './pages/SignupPage'));
+const LoginPage = React.lazy(() => import(/* webpackChunkName: "auth" */ './pages/LoginPage'));
+
+// Separate route component for better code organization
+const AnimatedRoutes = () => {
   const location = useLocation();
 
   return (
     <AnimatePresence mode="wait">
       <Switch location={location} key={location.pathname}>
-        <Route exact path="/">
-          <AnimatedPage>
+        <Route exact path="/" component={() => (
+          <Suspense fallback={<LoadingSpinner />}>
             <HomePage />
-          </AnimatedPage>
-        </Route>
-        <Route exact path="/shop">
-          <AnimatedPage>
+          </Suspense>
+        )} />
+        <Route exact path="/shop" component={() => (
+          <Suspense fallback={<LoadingSpinner />}>
             <ShopPage />
-          </AnimatedPage>
-        </Route>
-        <Route exact path="/shop/:category">
-          <AnimatedPage>
+          </Suspense>
+        )} />
+        <Route exact path="/shop/:category" component={() => (
+          <Suspense fallback={<LoadingSpinner />}>
             <ShopPage />
-          </AnimatedPage>
-        </Route>
-        <Route exact path="/shop/:gender/:category">
-          <AnimatedPage>
+          </Suspense>
+        )} />
+        <Route exact path="/shop/:gender/:category" component={() => (
+          <Suspense fallback={<LoadingSpinner />}>
             <ShopPage />
-          </AnimatedPage>
-        </Route>
-        <Route exact path="/contact">
-          <AnimatedPage>
+          </Suspense>
+        )} />
+        <Route exact path="/contact" component={() => (
+          <Suspense fallback={<LoadingSpinner />}>
             <ContactPage />
-          </AnimatedPage>
-        </Route>
-        <Route exact path="/team">
-          <AnimatedPage>
+          </Suspense>
+        )} />
+        <Route exact path="/team" component={() => (
+          <Suspense fallback={<LoadingSpinner />}>
             <TeamPage />
-          </AnimatedPage>
-        </Route>
-        <Route exact path="/about">
-          <AnimatedPage>
+          </Suspense>
+        )} />
+        <Route exact path="/about" component={() => (
+          <Suspense fallback={<LoadingSpinner />}>
             <AboutPage />
-          </AnimatedPage>
-        </Route>
-        <Route exact path="/product/:id">
-          <AnimatedPage>
+          </Suspense>
+        )} />
+        <Route exact path="/product/:id" component={() => (
+          <Suspense fallback={<LoadingSpinner />}>
             <ProductDetailPage />
-          </AnimatedPage>
-        </Route>
-        <Route exact path="/signup">
-          <AnimatedPage>
+          </Suspense>
+        )} />
+        <Route exact path="/signup" component={() => (
+          <Suspense fallback={<LoadingSpinner />}>
             <SignupPage />
-          </AnimatedPage>
-        </Route>
-        <Route exact path="/login">
-          <AnimatedPage>
+          </Suspense>
+        )} />
+        <Route exact path="/login" component={() => (
+          <Suspense fallback={<LoadingSpinner />}>
             <LoginPage />
-          </AnimatedPage>
-        </Route>
+          </Suspense>
+        )} />
       </Switch>
     </AnimatePresence>
   );
-}
+};
 
-function App() {
+const App = () => {
   const { initAuth } = useAuthStore();
 
   useEffect(() => {
@@ -99,9 +100,7 @@ function App() {
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-grow">
-          <React.Suspense fallback={<LoadingSpinner />}>
-            <AnimatedRoutes />
-          </React.Suspense>
+          <AnimatedRoutes />
         </main>
         <Footer />
         <ToastContainer
@@ -114,10 +113,11 @@ function App() {
           pauseOnFocusLoss
           draggable
           pauseOnHover
+          limit={3}
         />
       </div>
     </Router>
   );
-}
+};
 
 export default App;

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback, memo } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 import { Search, ShoppingCart, Heart, Menu, X, Phone, Mail } from 'lucide-react';
@@ -9,30 +9,30 @@ const shopCategories = {
   men: ['Bags', 'Belts', 'Cosmetics', 'Bags', 'Hats']
 };
 
-const Header = () => {
+const Header = memo(() => {
   const { user, logout } = useAuthStore();
   const history = useHistory();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
   const timeoutRef = useRef(null);
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
     setIsShopDropdownOpen(true);
-  };
+  }, []);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     timeoutRef.current = setTimeout(() => {
       setIsShopDropdownOpen(false);
     }, 100);
-  };
+  }, []);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     history.push('/');
-  };
+  }, [logout, history]);
 
   return (
     <header className="bg-white shadow-sm">
@@ -235,6 +235,6 @@ const Header = () => {
       )}
     </header>
   );
-};
+});
 
 export default Header;
