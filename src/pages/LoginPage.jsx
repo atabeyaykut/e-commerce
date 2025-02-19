@@ -1,34 +1,25 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useHistory, useLocation, Link } from 'react-router-dom';
-import useAuthStore from '../store/authStore';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { Facebook, Twitter } from 'lucide-react';
+import useAuthStore from '../store/authStore';
 
 const LoginPage = () => {
   const history = useHistory();
   const location = useLocation();
-  const { login, loading } = useAuthStore();
+  const { login, loading, error } = useAuthStore();
 
   const {
     register,
     handleSubmit,
     formState: { errors }
-  } = useForm();
-
-  const onSubmit = async (formData) => {
-    const loginData = {
-      email: formData.email.trim(),
-      password: formData.password,
-      rememberMe: formData.rememberMe || false
-    };
-
-    const success = await login(loginData);
-    if (success) {
-      // Redirect to the previous page or home
-      const { from } = location.state || { from: { pathname: '/' } };
-      history.replace(from);
+  } = useForm({
+    defaultValues: {
+      email: '',
+      password: '',
+      rememberMe: false
     }
-  };
+  });
 
   useEffect(() => {
     window.scrollTo({
@@ -37,10 +28,19 @@ const LoginPage = () => {
     });
   }, []);
 
+  const onSubmit = async (data) => {
+    const success = await login(data);
+    if (success) {
+      const { from } = location.state || { from: { pathname: '/' } };
+      history.replace(from);
+    }
+  };
+
   return (
     <div className="flex min-h-screen">
       {/* Left Side - Image */}
-      <div className="hidden lg:flex lg:w-1/2 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1964&q=80')" }}>
+      <div className="hidden lg:flex lg:w-1/2 bg-cover bg-center" 
+        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1964&q=80')" }}>
         <div className="flex items-center h-full px-20 bg-gray-900 bg-opacity-40">
           <div>
             <h2 className="text-4xl font-bold text-white">Welcome Back</h2>
@@ -67,7 +67,7 @@ const LoginPage = () => {
               </p>
             </div>
 
-            <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+            <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)} autoComplete="on">
               <div className="space-y-4">
                 {/* Email Field */}
                 <div>
@@ -78,6 +78,7 @@ const LoginPage = () => {
                     <input
                       id="email"
                       type="email"
+                      autoComplete="email"
                       {...register('email', {
                         required: 'Email is required',
                         pattern: {
@@ -103,8 +104,13 @@ const LoginPage = () => {
                     <input
                       id="password"
                       type="password"
+                      autoComplete="current-password"
                       {...register('password', {
-                        required: 'Password is required'
+                        required: 'Password is required',
+                        minLength: {
+                          value: 6,
+                          message: 'Password must be at least 6 characters'
+                        }
                       })}
                       className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                       placeholder="Enter your password"
@@ -121,6 +127,7 @@ const LoginPage = () => {
                     <input
                       id="remember-me"
                       type="checkbox"
+                      autoComplete="off"
                       {...register('rememberMe')}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />

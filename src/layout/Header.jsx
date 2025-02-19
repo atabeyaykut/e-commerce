@@ -1,8 +1,7 @@
 import React, { useState, useRef, useCallback, memo } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
-import { Search, ShoppingCart, Heart, Menu, X, Phone, Mail } from 'lucide-react';
-import { getGravatarUrl } from '../utils/gravatar';
+import { Search, ShoppingCart, Heart, Menu, X, Phone, Mail, User } from 'lucide-react';
 
 const shopCategories = {
   women: ['Bags', 'Belts', 'Cosmetics', 'Bags', 'Hats'],
@@ -10,7 +9,7 @@ const shopCategories = {
 };
 
 const Header = memo(() => {
-  const { user, logout } = useAuthStore();
+  const { isAuthenticated, logout } = useAuthStore();
   const history = useHistory();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
@@ -83,7 +82,7 @@ const Header = memo(() => {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/" className="text-gray-900 hover:text-blue-600">
+              <Link to="/" className="text-gray-600 hover:text-blue-600">
                 Home
               </Link>
               <div className="relative">
@@ -148,28 +147,35 @@ const Header = memo(() => {
 
             {/* Right Side */}
             <div className="flex items-center space-x-6">
-              {user ? (
-                <div className="flex items-center space-x-4">
-                  <img
-                    src={getGravatarUrl(user.email)}
-                    alt={user.name}
-                    className="h-8 w-8 rounded-full"
-                  />
-                  <span className="text-gray-700">{user.name}</span>
-                  <button
-                    onClick={handleLogout}
-                    className="text-blue-600 cursor-pointer hover:text-red-600"
-                  >
-                    Logout
-                  </button>
-                </div>
-              ) : (
-                <div className="hidden md:flex items-center">
-                  <Link to="/login" className="text-blue-600 hover:text-blue-700">Login</Link>
-                  <span className="mx-2 text-gray-400">/</span>
-                  <Link to="/signup" className="text-blue-600 hover:text-blue-700">Register</Link>
-                </div>
-              )}
+              {/* Auth Section */}
+              <div className="hidden md:flex items-center space-x-4">
+                {isAuthenticated ? (
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <User className="w-5 h-5 text-gray-600" />
+                      <span className="text-gray-700">My Account</span>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="text-blue-600 hover:text-red-600 transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <Link to="/login" className="text-blue-600 hover:text-blue-700">
+                      Login
+                    </Link>
+                    <span className="text-gray-400">/</span>
+                    <Link to="/signup" className="text-blue-600 hover:text-blue-700">
+                      Register
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Icons */}
               <button className="text-gray-600 hover:text-blue-600">
                 <Search className="w-5 h-5" />
               </button>
@@ -219,17 +225,39 @@ const Header = memo(() => {
               About
             </Link>
             <Link
-              to="/team"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-            >
-              Team
-            </Link>
-            <Link
               to="/contact"
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             >
               Contact
             </Link>
+            {isAuthenticated ? (
+              <>
+                <div className="px-3 py-2 text-base font-medium text-gray-700">
+                  My Account
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-700 hover:bg-gray-50"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-blue-600 hover:text-blue-700 hover:bg-gray-50"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/signup"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-blue-600 hover:text-blue-700 hover:bg-gray-50"
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
