@@ -1,142 +1,183 @@
 import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
 import { toast } from 'react-toastify';
-import api from '../utils/axios';
-import useClientStore from './clientStore';
-import md5 from 'md5';
+import api from '../services/api';
 
-const initialState = {
+const useAuthStore = create((set) => ({
+  user: null,
+  token: null,
   loading: false,
-  error: null
-};
+  error: null,
+  isAuthenticated: false,
 
-const authStore = (set, get) => ({
-  ...initialState,
-
-  // Initialize auth state from storage
-  initAuth: async () => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    
-    if (!token) {
-      return false;
-    }
-
+  login: async ({ email, password, rememberMe }) => {
+    set({ loading: true, error: null });
     try {
-      // Set token in API headers
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      // Fetch user profile
-      const response = await api.get('/user/profile');
-      
-      if (!response.data) {
-        throw new Error('No user data received');
+      // For development testing, simulate successful login
+      if (process.env.NODE_ENV === 'development') {
+        const mockResponse = {
+          token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIxLCJpYXQiOjE3Mzk5Njk3NjcsImV4cCI6MTc0MTYxMTM2N30.GiHyByvRaciZbSUZjeaLqvpWBbmNPYIOZeO0nlbD7g0",
+          name: "Cust Omer",
+          email: "customer@commerce.com",
+          role_id: "3"
+        };
+
+        // Store rememberMe preference
+        localStorage.setItem('rememberMe', rememberMe);
+
+        // Store token and user data if rememberMe is true
+        if (rememberMe) {
+          localStorage.setItem('token', mockResponse.token);
+          localStorage.setItem('user', JSON.stringify({
+            name: mockResponse.name,
+            email: mockResponse.email,
+            role_id: mockResponse.role_id
+          }));
+        }
+
+        // Set token in axios headers (without Bearer prefix)
+        api.defaults.headers.common['Authorization'] = mockResponse.token;
+
+        set({
+          user: {
+            name: mockResponse.name,
+            email: mockResponse.email,
+            role_id: mockResponse.role_id
+          },
+          token: mockResponse.token,
+          isAuthenticated: true,
+          loading: false
+        });
+
+        toast.success('Successfully logged in!');
+        return true;
       }
 
-      const userData = {
-        id: response.data.id,
-        name: response.data.name || response.data.email.split('@')[0],
-        email: response.data.email,
-        role: response.data.role,
-        avatar: `https://www.gravatar.com/avatar/${md5(response.data.email.toLowerCase().trim())}?s=200&d=identicon`
-      };
+      const response = await api.post('/login', { email, password });
+      const { token, name, email: userEmail, role_id } = response.data;
 
-      // Update user in client store
-      useClientStore.getState().setUser(userData);
-      
-      return true;
-    } catch (error) {
-      console.error('Error initializing auth:', error);
-      // Clear invalid token
-      localStorage.removeItem('token');
-      sessionStorage.removeItem('token');
-      delete api.defaults.headers.common['Authorization'];
-      return false;
-    }
-  },
+      // Store rememberMe preference
+      localStorage.setItem('rememberMe', rememberMe);
 
-  // Actions
-  login: async (credentials) => {
-    set({ loading: true, error: null });
+      // Store token and user data if rememberMe is true
+      if (rememberMe) {
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify({
+          name,
+          email: userEmail,
+          role_id
+        }));
+      }
 
-    try {
-      const response = await api.post('/login', {
-        email: credentials.email,
-        password: credentials.password
+      // Set token in axios headers (without Bearer prefix)
+      api.defaults.headers.common['Authorization'] = token;
+
+      set({
+        user: {
+          name,
+          email: userEmail,
+          role_id
+        },
+        token,
+        isAuthenticated: true,
+        loading: false
       });
 
-      if (!response.data) {
-        throw new Error('No response data received');
-      }
-
-      const userData = {
-        id: response.data.id,
-        name: response.data.name || response.data.email.split('@')[0],
-        email: response.data.email,
-        role: response.data.role,
-        avatar: `https://www.gravatar.com/avatar/${md5(response.data.email.toLowerCase().trim())}?s=200&d=identicon`
-      };
-
-      const token = response.data.token;
-
-      if (!userData.email || !token) {
-        throw new Error('Invalid response data structure');
-      }
-
-      // Store token based on remember me preference
-      if (credentials.rememberMe) {
-        localStorage.setItem('token', token);
-      } else {
-        sessionStorage.setItem('token', token);
-      }
-
-      // Set token in API headers
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-      // Update user in client store
-      useClientStore.getState().setUser(userData);
-
-      // Show success message
-      toast.success('Login successful!');
-
-      set({ loading: false, error: null });
+      toast.success('Successfully logged in!');
       return true;
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
-      set({ loading: false, error: errorMessage });
-      toast.error(errorMessage);
+      set({
+        error: error.response?.data?.message || 'An error occurred during login',
+        loading: false
+      });
+      toast.error(error.response?.data?.message || 'An error occurred during login');
       return false;
     }
   },
 
   logout: () => {
-    // Clear token
+    // Clear all auth-related data from localStorage
     localStorage.removeItem('token');
-    sessionStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('rememberMe');
     
-    // Clear auth headers
+    // Remove token from axios headers
     delete api.defaults.headers.common['Authorization'];
-    
-    // Clear user from client store
-    useClientStore.getState().setUser(null);
-    
-    // Reset state
-    set(initialState);
-    
-    // Show success message
-    toast.success('Logged out successfully');
+
+    set({
+      user: null,
+      token: null,
+      isAuthenticated: false
+    });
+
+    toast.success('Successfully logged out!');
   },
 
-  // Get current auth state
-  getAuthState: () => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    if (token) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      return true;
+  verifyToken: async () => {
+    const token = localStorage.getItem('token');
+    const rememberMe = localStorage.getItem('rememberMe') === 'true';
+    
+    // Only proceed if we have a token AND rememberMe was true
+    if (!token || !rememberMe) {
+      // Clear any leftover data if rememberMe is false
+      if (!rememberMe) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        delete api.defaults.headers.common['Authorization'];
+      }
+      return;
     }
-    return false;
-  }
-});
 
-const useAuthStore = create(devtools(authStore, { name: 'Auth Store' }));
+    try {
+      // For development testing, simulate successful verification
+      if (process.env.NODE_ENV === 'development') {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          const user = JSON.parse(userData);
+          
+          // Set token in axios headers (without Bearer prefix)
+          api.defaults.headers.common['Authorization'] = token;
+
+          set({
+            user,
+            token,
+            isAuthenticated: true
+          });
+        }
+        return;
+      }
+
+      // Set token in axios headers (without Bearer prefix)
+      api.defaults.headers.common['Authorization'] = token;
+
+      // Verify token with backend
+      const response = await api.get('/verify');
+      const { name, email, role_id } = response.data;
+
+      // Update user data in store and localStorage
+      const user = { name, email, role_id };
+      if (rememberMe) {
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+
+      set({
+        user,
+        token,
+        isAuthenticated: true
+      });
+    } catch (error) {
+      // If token verification fails, clear everything
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('rememberMe');
+      delete api.defaults.headers.common['Authorization'];
+      
+      set({
+        user: null,
+        token: null,
+        isAuthenticated: false
+      });
+    }
+  }
+}));
 
 export default useAuthStore;

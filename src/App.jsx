@@ -1,123 +1,108 @@
-import React, { useEffect, Suspense } from 'react';
-import { BrowserRouter as Router, Route, Switch, useLocation } from 'react-router-dom';
+import React, { useEffect, Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { AnimatePresence } from 'framer-motion';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Components that are part of the main layout should not be lazy loaded
+import useAuthStore from './store/authStore';
 import Header from './layout/Header';
 import Footer from './layout/Footer';
-import useAuthStore from './store/authStore';
+import LoadingSpinner from './components/ui/LoadingSpinner';
 
-// Loading component with reduced motion
-const LoadingSpinner = () => (
-  <div className="flex items-center justify-center min-h-[50vh]">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-  </div>
-);
+// Lazy load pages
+const HomePage = lazy(() => import('./pages/HomePage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const TeamPage = lazy(() => import('./pages/TeamPage'));
+const ShopPage = lazy(() => import('./pages/ShopPage'));
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
+const MyAccountPage = lazy(() => import('./pages/MyAccountPage'));
 
-// Lazy load components with descriptive chunk names
-const HomePage = React.lazy(() => import(/* webpackChunkName: "home" */ './pages/HomePage'));
-const ShopPage = React.lazy(() => import(/* webpackChunkName: "shop" */ './pages/ShopPage'));
-const ContactPage = React.lazy(() => import(/* webpackChunkName: "contact" */ './pages/ContactPage'));
-const TeamPage = React.lazy(() => import(/* webpackChunkName: "team" */ './pages/TeamPage'));
-const AboutPage = React.lazy(() => import(/* webpackChunkName: "about" */ './pages/AboutPage'));
-const ProductDetailPage = React.lazy(() => import(/* webpackChunkName: "product" */ './pages/ProductDetailPage'));
-const SignupPage = React.lazy(() => import(/* webpackChunkName: "auth" */ './pages/SignupPage'));
-const LoginPage = React.lazy(() => import(/* webpackChunkName: "auth" */ './pages/LoginPage'));
-
-// Separate route component for better code organization
-const AnimatedRoutes = () => {
-  const location = useLocation();
-
-  return (
-    <AnimatePresence mode="wait">
-      <Switch location={location} key={location.pathname}>
-        <Route exact path="/" component={() => (
-          <Suspense fallback={<LoadingSpinner />}>
-            <HomePage />
-          </Suspense>
-        )} />
-        <Route exact path="/shop" component={() => (
-          <Suspense fallback={<LoadingSpinner />}>
-            <ShopPage />
-          </Suspense>
-        )} />
-        <Route exact path="/shop/:category" component={() => (
-          <Suspense fallback={<LoadingSpinner />}>
-            <ShopPage />
-          </Suspense>
-        )} />
-        <Route exact path="/shop/:gender/:category" component={() => (
-          <Suspense fallback={<LoadingSpinner />}>
-            <ShopPage />
-          </Suspense>
-        )} />
-        <Route exact path="/contact" component={() => (
-          <Suspense fallback={<LoadingSpinner />}>
-            <ContactPage />
-          </Suspense>
-        )} />
-        <Route exact path="/team" component={() => (
-          <Suspense fallback={<LoadingSpinner />}>
-            <TeamPage />
-          </Suspense>
-        )} />
-        <Route exact path="/about" component={() => (
-          <Suspense fallback={<LoadingSpinner />}>
-            <AboutPage />
-          </Suspense>
-        )} />
-        <Route exact path="/product/:id" component={() => (
-          <Suspense fallback={<LoadingSpinner />}>
-            <ProductDetailPage />
-          </Suspense>
-        )} />
-        <Route exact path="/signup" component={() => (
-          <Suspense fallback={<LoadingSpinner />}>
-            <SignupPage />
-          </Suspense>
-        )} />
-        <Route exact path="/login" component={() => (
-          <Suspense fallback={<LoadingSpinner />}>
-            <LoginPage />
-          </Suspense>
-        )} />
-      </Switch>
-    </AnimatePresence>
-  );
-};
-
-const App = () => {
-  const { initAuth } = useAuthStore();
+function App() {
+  const { verifyToken } = useAuthStore();
 
   useEffect(() => {
-    initAuth();
-  }, [initAuth]);
+    verifyToken();
+  }, [verifyToken]);
 
   return (
     <Router>
       <div className="flex flex-col min-h-screen">
+        <ToastContainer position="top-right" />
         <Header />
         <main className="flex-grow">
-          <AnimatedRoutes />
+          <AnimatePresence mode="wait">
+            <Switch>
+              <Route exact path="/" component={() => (
+                <Suspense fallback={<LoadingSpinner />}>
+                  <HomePage />
+                </Suspense>
+              )} />
+              <Route path="/login" component={() => (
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LoginPage />
+                </Suspense>
+              )} />
+              <Route path="/signup" component={() => (
+                <Suspense fallback={<LoadingSpinner />}>
+                  <SignupPage />
+                </Suspense>
+              )} />
+              <Route exact path="/shop" component={() => (
+                <Suspense fallback={<LoadingSpinner />}>
+                  <ShopPage />
+                </Suspense>
+              )} />
+              <Route exact path="/shop/:category" component={() => (
+                <Suspense fallback={<LoadingSpinner />}>
+                  <ShopPage />
+                </Suspense>
+              )} />
+              <Route exact path="/shop/:gender/:category" component={() => (
+                <Suspense fallback={<LoadingSpinner />}>
+                  <ShopPage />
+                </Suspense>
+              )} />
+              <Route exact path="/product/:id" component={() => (
+                <Suspense fallback={<LoadingSpinner />}>
+                  <ProductDetailPage />
+                </Suspense>
+              )} />
+              <Route path="/about" component={() => (
+                <Suspense fallback={<LoadingSpinner />}>
+                  <AboutPage />
+                </Suspense>
+              )} />
+              <Route path="/team" component={() => (
+                <Suspense fallback={<LoadingSpinner />}>
+                  <TeamPage />
+                </Suspense>
+              )} />
+              <Route path="/contact" component={() => (
+                <Suspense fallback={<LoadingSpinner />}>
+                  <ContactPage />
+                </Suspense>
+              )} />
+              <Route path="/my-account" component={() => (
+                <Suspense fallback={<LoadingSpinner />}>
+                  <MyAccountPage />
+                </Suspense>
+              )} />
+              <Route path="*" render={() => (
+                <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+                  <h1 className="text-4xl font-bold text-gray-800 mb-4">404</h1>
+                  <p className="text-xl text-gray-600">Page not found</p>
+                </div>
+              )} />
+            </Switch>
+          </AnimatePresence>
         </main>
         <Footer />
-        <ToastContainer
-          position="bottom-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          limit={3}
-        />
       </div>
     </Router>
   );
-};
+}
 
 export default App;
