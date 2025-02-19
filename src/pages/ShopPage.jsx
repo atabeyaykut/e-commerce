@@ -1,16 +1,28 @@
-import React, { useState } from 'react';
-import { Grid, List } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
+import { Grid, List, Filter } from 'lucide-react';
 import ShopProductGrid from '../components/ecommerce/ShopProductGrid';
 import PageHeader from '../components/ui/PageHeader';
 import BrandLogos from '../components/ui/BrandLogos';
 
 const ShopPage = () => {
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const { category, gender } = useParams();
+  const history = useHistory();
+  const [viewMode, setViewMode] = useState('grid');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState(category);
+  const [selectedGender, setSelectedGender] = useState(gender);
+
+  useEffect(() => {
+    setSelectedCategory(category);
+    setSelectedGender(gender);
+  }, [category, gender]);
 
   const breadcrumbs = [
     { label: 'Home', link: '/' },
-    { label: 'Shop' }
+    { label: 'Shop', link: '/shop' },
+    ...(gender ? [{ label: gender.charAt(0).toUpperCase() + gender.slice(1), link: `/shop/${gender}` }] : []),
+    ...(category ? [{ label: category.charAt(0).toUpperCase() + category.slice(1) }] : [])
   ];
 
   const categories = [
@@ -18,65 +30,81 @@ const ShopPage = () => {
       id: 1,
       title: 'CLOTHING',
       image: 'https://picsum.photos/400/500?random=1',
-      items: '5 Items'
+      items: '5 Items',
+      slug: 'clothing'
     },
     {
       id: 2,
       title: 'SHOES',
       image: '/images/categories/shoes.jpg',
-      items: '5 Items'
+      items: '5 Items',
+      slug: 'shoes'
     },
     {
       id: 3,
       title: 'ACCESSORIES',
       image: '/images/categories/accessories.jpg',
-      items: '5 Items'
+      items: '5 Items',
+      slug: 'accessories'
     },
     {
       id: 4,
       title: 'BAGS',
       image: '/images/categories/bags.jpg',
-      items: '5 Items'
+      items: '5 Items',
+      slug: 'bags'
     },
     {
       id: 5,
       title: 'JEWELRY',
       image: '/images/categories/jewelry.jpg',
-      items: '5 Items'
+      items: '5 Items',
+      slug: 'jewelry'
     }
   ];
 
-  const products = [
-    {
-      id: 1,
-      title: 'Graphic Design',
-      category: 'English Department',
-      price: 16.48,
-      oldPrice: 6.48,
-      rating: 4,
-      image: 'https://picsum.photos/400/500?random=5',
-      colors: ['#23A6F0', '#2DC071', '#E77C40', '#252B42']
-    },
-    // Add more products as needed
-  ];
+  const handleCategoryClick = (categorySlug) => {
+    if (gender) {
+      history.push(`/shop/${gender}/${categorySlug}`);
+    } else {
+      history.push(`/shop/${categorySlug}`);
+    }
+  };
+
+  const handleGenderChange = (newGender) => {
+    if (category) {
+      history.push(`/shop/${newGender}/${category}`);
+    } else {
+      history.push(`/shop/${newGender}`);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <PageHeader title="Shop" breadcrumbs={breadcrumbs} />
       
-      {/* Header with Categories */}
+      {/* Gender Filter */}
+     
+
+      {/* Categories Grid */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-9/11 mx-auto px-4">
-        {categories.map((category) => (
-          <div key={category.id} className="relative group cursor-pointer">
+        {categories.map((cat) => (
+          <div
+            key={cat.id}
+            className="relative group cursor-pointer"
+            onClick={() => handleCategoryClick(cat.slug)}
+          >
             <div className="aspect-[1/1] overflow-hidden h-full w-full">
               <img
                 src="https://picsum.photos/300/400"
-                alt={category.title}
+                alt={cat.title}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white">
-                <h3 className="text-base md:text-xl font-bold">{category.title}</h3>
-                <p className="mt-2 text-xs md:text-sm">{category.items}</p>
+              <div className={`absolute inset-0 flex flex-col items-center justify-center text-white ${
+                selectedCategory === cat.slug ? 'bg-blue-600 bg-opacity-70' : 'bg-black bg-opacity-40'
+              }`}>
+                <h3 className="text-base md:text-xl font-bold">{cat.title}</h3>
+                <p className="mt-2 text-xs md:text-sm">{cat.items}</p>
               </div>
             </div>
           </div>
@@ -88,7 +116,11 @@ const ShopPage = () => {
         {/* Filter Bar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 md:gap-0">
           <div className="flex items-center justify-between md:justify-start gap-4">
-            <span className="text-sm text-gray-500">Showing all 20 results</span>
+            <span className="text-sm text-gray-500">
+              {selectedCategory || selectedGender 
+                ? `Showing results for ${[selectedGender, selectedCategory].filter(Boolean).join(' - ')}`
+                : 'Showing all results'}
+            </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setViewMode('grid')}
@@ -112,13 +144,14 @@ const ShopPage = () => {
               <option>Price: High to Low</option>
             </select>
             <button className="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded-md text-sm">
+              <Filter className="w-4 h-4 inline-block mr-2" />
               Filter
             </button>
           </div>
         </div>
 
         {/* Products Grid */}
-        <ShopProductGrid />
+        <ShopProductGrid category={selectedCategory} gender={selectedGender} viewMode={viewMode} />
 
         <BrandLogos />
 

@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, memo } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 import { Search, ShoppingCart, Heart, Menu, X, Phone, Mail, User } from 'lucide-react';
+import md5 from 'md5';
 
 const shopCategories = {
   women: ['Bags', 'Belts', 'Cosmetics', 'Bags', 'Hats'],
@@ -9,7 +10,7 @@ const shopCategories = {
 };
 
 const Header = memo(() => {
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated, user, logout } = useAuthStore();
   const history = useHistory();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
@@ -32,6 +33,9 @@ const Header = memo(() => {
     logout();
     history.push('/');
   }, [logout, history]);
+
+  // Create Gravatar URL if user exists
+  const gravatarUrl = user ? `https://www.gravatar.com/avatar/${md5(user.email.toLowerCase().trim())}?s=32&d=identicon` : '';
 
   return (
     <header className="bg-white shadow-sm">
@@ -152,8 +156,12 @@ const Header = memo(() => {
                 {isAuthenticated ? (
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
-                      <User className="w-5 h-5 text-gray-600" />
-                      <span className="text-gray-700">My Account</span>
+                      <img
+                        src={gravatarUrl}
+                        alt={user.name}
+                        className="h-8 w-8 rounded-full"
+                      />
+                      <span className="text-gray-700">{user.name}</span>
                     </div>
                     <button
                       onClick={handleLogout}
@@ -233,7 +241,12 @@ const Header = memo(() => {
             {isAuthenticated ? (
               <>
                 <div className="px-3 py-2 text-base font-medium text-gray-700">
-                  My Account
+                  <img
+                    src={gravatarUrl}
+                    alt={user.name}
+                    className="h-8 w-8 rounded-full"
+                  />
+                  <span className="ml-2">{user.name}</span>
                 </div>
                 <button
                   onClick={handleLogout}
