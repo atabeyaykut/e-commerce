@@ -79,7 +79,7 @@ const SignupPage = () => {
       };
 
       // Add store data if registering as a store
-      if (data.role_id === '3') {
+      if (data.role_id === roles.find(r => r.code === 'store')?.id.toString()) {
         formData.store = {
           name: data.store_name,
           phone: data.store_phone,
@@ -88,7 +88,7 @@ const SignupPage = () => {
         };
       }
 
-      const response = await api.post('/register', formData);
+      const response = await api.post('/signup', formData);
 
       if (response.data) {
         history.push('/login?registered=true');

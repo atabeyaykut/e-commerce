@@ -31,7 +31,7 @@ api.interceptors.request.use(
   }
 );
 
-// Response Interceptor for debugging
+// Response Interceptor for debuging
 api.interceptors.response.use(
   (response) => {
     // Log the response
