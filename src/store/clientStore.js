@@ -3,49 +3,110 @@ import { devtools, persist } from 'zustand/middleware';
 import api from '../utils/axios';
 
 const initialState = {
-  user: null,
-  addressList: [],
-  creditCards: [],
-  roles: [],
-  theme: 'light',
-  language: 'en'
+  user: null,         // All user information
+  addressList: [],    // User's address list
+  creditCards: [],    // User's credit card list
+  roles: [],         // Available roles
+  theme: 'light',    // UI theme preference
+  language: 'en'     // Language preference
 };
 
 const clientStore = (set, get) => ({
   ...initialState,
 
-  // Setters
-  setUser: (user) => set({ user }),
-  setAddressList: (addressList) => set({ addressList }),
-  setCreditCards: (creditCards) => set({ creditCards }),
-  setRoles: (roles) => set({ roles }),
-  setTheme: (theme) => set({ theme }),
-  setLanguage: (language) => set({ language }),
-
-  // Actions
-  fetchRoles: async () => {
-    const { roles } = get();
-    if (roles.length === 0) {
-      try {
-        const response = await api.get('/roles');
-        set({ roles: response.data });
-      } catch (error) {
-        console.error('Error fetching roles:', error);
-      }
-    }
+  // Set user information
+  setUser: (userData) => {
+    set((state) => ({
+      ...state,
+      user: userData
+    }), false, 'setUser');
   },
 
-  // Reset
-  reset: () => set(initialState)
+  // Set user's address list
+  setAddressList: (addresses) => {
+    set((state) => ({
+      ...state,
+      addressList: addresses
+    }), false, 'setAddressList');
+  },
+
+  // Set user's credit card list
+  setCreditCards: (cards) => {
+    set((state) => ({
+      ...state,
+      creditCards: cards
+    }), false, 'setCreditCards');
+  },
+
+  // Set available roles
+  setRoles: (roles) => {
+    set((state) => ({
+      ...state,
+      roles: roles
+    }), false, 'setRoles');
+  },
+
+  // Set UI theme
+  setTheme: (theme) => {
+    set((state) => ({
+      ...state,
+      theme: theme
+    }), false, 'setTheme');
+
+    // Apply theme to document
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(theme);
+  },
+
+  // Set language preference
+  setLanguage: (language) => {
+    set((state) => ({
+      ...state,
+      language: language
+    }), false, 'setLanguage');
+
+    // Set HTML lang attribute
+    document.documentElement.lang = language;
+  },
+
+  // Reset store to initial state
+  reset: () => {
+    set(initialState, false, 'reset');
+  },
+
+  // Fetch user profile data
+  fetchUserProfile: async () => {
+    try {
+      const [userResponse, addressesResponse, cardsResponse] = await Promise.all([
+        api.get('/user/profile'),
+        api.get('/user/addresses'),
+        api.get('/user/credit-cards')
+      ]);
+
+      set((state) => ({
+        ...state,
+        user: userResponse.data,
+        addressList: addressesResponse.data,
+        creditCards: cardsResponse.data
+      }), false, 'fetchUserProfile');
+
+      return true;
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      return false;
+    }
+  }
 });
 
+// Create store with persistence and dev tools
 const useClientStore = create(
   devtools(
     persist(clientStore, {
       name: 'client-storage',
       partialize: (state) => ({
         theme: state.theme,
-        language: state.language
+        language: state.language,
+        user: state.user
       })
     })
   )
