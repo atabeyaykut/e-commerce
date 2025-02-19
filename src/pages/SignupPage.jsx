@@ -5,9 +5,9 @@ import { Facebook, Twitter } from 'lucide-react';
 import api from '../utils/axios';
 
 const SignupPage = () => {
-  const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [roles, setRoles] = useState([]);
   const history = useHistory();
 
   const {
@@ -16,7 +16,11 @@ const SignupPage = () => {
     watch,
     setValue,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      role_id: '', // Default to empty
+    }
+  });
 
   const selectedRole = watch('role_id');
 
@@ -34,23 +38,30 @@ const SignupPage = () => {
     const fetchRoles = async () => {
       try {
         const response = await api.get('/roles');
-        setRoles(response.data);
-
-        // Find customer role and set it as default
-        const customerRole = response.data.find(role => role.name.toLowerCase() === 'customer');
-        if (customerRole) {
-          setValue('role_id', customerRole.id.toString());
+        // Filter roles to get only customer and store roles using code
+        const customerRole = response.data.find(role => role.code === 'customer');
+        const storeRole = response.data.find(role => role.code === 'store');
+        
+        if (!customerRole || !storeRole) {
+          throw new Error('Required roles not found');
         }
+
+        // Sort roles to ensure customer is first
+        const sortedRoles = [customerRole, storeRole];
+        setRoles(sortedRoles);
+        setValue('role_id', customerRole.id.toString());
       } catch (err) {
-        setError('Failed to fetch roles');
+        console.error('Failed to fetch roles:', err);
+        setError('Failed to load account types. Please try again later.');
       }
     };
+
     fetchRoles();
   }, [setValue]);
 
   useEffect(() => {
     window.scrollTo({
-      top: 120, // 7.5rem = 120px
+      top: 120,
       behavior: 'smooth'
     });
   }, []);
@@ -60,32 +71,30 @@ const SignupPage = () => {
     setError('');
 
     try {
-      // Format the data based on the role
       const formData = {
         name: data.name,
         email: data.email,
         password: data.password,
-        role_id: data.role_id,
+        role_id: data.role_id
       };
 
-      // Add store data if role is store
-      if (data.role_id === '3') { // Assuming 3 is store role_id
+      // Add store data if registering as a store
+      if (data.role_id === '3') {
         formData.store = {
           name: data.store_name,
           phone: data.store_phone,
           tax_no: data.tax_no,
-          bank_account: data.bank_account,
+          bank_account: data.bank_account
         };
       }
 
-      await api.post('/signup', formData);
+      const response = await api.post('/register', formData);
 
-      // Redirect with success message using state
-      history.goBack();
-      // Add message to localStorage for displaying after redirect
-      localStorage.setItem('signupMessage', 'You need to click link in email to activate your account!');
+      if (response.data) {
+        history.push('/login?registered=true');
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -94,7 +103,7 @@ const SignupPage = () => {
   return (
     <div className="flex min-h-screen">
       {/* Left Side - Image */}
-      <div className="hidden lg:flex lg:w-1/2 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1950&q=80')" }}>
+      <div className="hidden lg:flex lg:w-1/2 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1441986300917-64674bd600d8')" }}>
         <div className="flex items-center h-full px-20 bg-gray-900 bg-opacity-40">
           <div>
             <h2 className="text-4xl font-bold text-white">Join Our Community</h2>
@@ -126,6 +135,8 @@ const SignupPage = () => {
 
             <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
               <div className="space-y-4">
+
+
                 {/* Name Field */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -219,22 +230,26 @@ const SignupPage = () => {
                   </div>
                 </div>
 
-                {/* Role Selection */}
+                {/* Account Type Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Account Type
                   </label>
                   <div className="mt-1">
                     <select
-                      {...register('role_id', { required: 'Role selection is required' })}
+                      {...register('role_id', { required: 'Please select an account type' })}
                       className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      disabled={loading}
+                      disabled={loading || roles.length === 0}
                     >
-                      {roles.map(role => (
-                        <option key={role.id} value={role.id}>
-                          {role.name}
-                        </option>
-                      ))}
+                      {roles.length > 0 ? (
+                        roles.map(role => (
+                          <option key={role.id} value={role.id}>
+                            {role.code === 'customer' ? 'Customer' : 'Store'}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="">Loading...</option>
+                      )}
                     </select>
                     {errors.role_id && (
                       <p className="mt-1 text-sm text-red-600">{errors.role_id.message}</p>
@@ -242,8 +257,8 @@ const SignupPage = () => {
                   </div>
                 </div>
 
-                {/* Conditional Store Fields */}
-                {selectedRole === '3' && (
+                {/* Store Fields */}
+                {selectedRole === roles.find(r => r.code === 'store')?.id.toString() && (
                   <div className="space-y-4 mt-4 p-4 bg-gray-50 rounded-md">
                     <h3 className="text-lg font-medium text-gray-900">Store Information</h3>
 
@@ -254,7 +269,13 @@ const SignupPage = () => {
                       </label>
                       <input
                         type="text"
-                        {...register('store_name', { required: 'Store name is required' })}
+                        {...register('store_name', {
+                          required: 'Store name is required',
+                          minLength: {
+                            value: 3,
+                            message: 'Store name must be at least 3 characters'
+                          }
+                        })}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         placeholder="Enter store name"
                       />
@@ -278,7 +299,7 @@ const SignupPage = () => {
                           }
                         })}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        placeholder="+90 XXX XXX XX XX"
+                        placeholder="+90 5XX XXX XX XX"
                       />
                       {errors.store_phone && (
                         <p className="mt-1 text-sm text-red-600">{errors.store_phone.message}</p>
@@ -322,7 +343,7 @@ const SignupPage = () => {
                           }
                         })}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        placeholder="TR..."
+                        placeholder="TRXX XXXX XXXX XXXX XXXX XXXX XX"
                       />
                       {errors.bank_account && (
                         <p className="mt-1 text-sm text-red-600">{errors.bank_account.message}</p>
@@ -336,10 +357,7 @@ const SignupPage = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${loading
-                    ? 'bg-blue-400 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-                    }`}
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                 >
                   {loading ? 'Creating Account...' : 'Create Account'}
                 </button>
@@ -348,7 +366,7 @@ const SignupPage = () => {
               <div className="mt-6">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300"></div>
+                    <div className="w-full border-t border-gray-300" />
                   </div>
                   <div className="relative flex justify-center text-sm">
                     <span className="px-2 bg-white text-gray-500">Or continue with</span>
@@ -356,34 +374,30 @@ const SignupPage = () => {
                 </div>
 
                 <div className="mt-6 grid grid-cols-2 gap-3">
-                  <div>
-                    <button
-                      type="button"
-                      className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                    >
-                      <Facebook className="h-5 w-5 text-blue-600" />
-                      <span className="ml-2">Facebook</span>
-                    </button>
-                  </div>
-                  <div>
-                    <button
-                      type="button"
-                      className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                    >
-                      <Twitter className="h-5 w-5 text-blue-400" />
-                      <span className="ml-2">Twitter</span>
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                  >
+                    <Facebook className="h-5 w-5 text-blue-600" />
+                    <span className="ml-2">Facebook</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                  >
+                    <Twitter className="h-5 w-5 text-blue-400" />
+                    <span className="ml-2">Twitter</span>
+                  </button>
                 </div>
               </div>
-
-              <p className="mt-2 text-center text-sm text-gray-600">
-                Already have an account?{' '}
-                <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-                  Sign in
-                </Link>
-              </p>
             </form>
+
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Already have an account?{' '}
+              <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
+                Sign in
+              </Link>
+            </p>
           </div>
         </div>
       </div>
