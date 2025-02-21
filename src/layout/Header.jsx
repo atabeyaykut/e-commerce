@@ -204,7 +204,7 @@ const Header = memo(() => {
             <nav className="hidden md:flex">
               <ul className="flex items-center gap-8">
                 <li>
-                  <Link 
+                  <Link
                     to="/"
                     className="text-gray-600 hover:text-gray-800 px-3 py-2"
                   >
@@ -212,9 +212,9 @@ const Header = memo(() => {
                   </Link>
                 </li>
                 <li className="relative group">
-                  <button 
+                  <button
                     onClick={() => history.push('/shop')}
-                    className="text-gray-600 hover:text-gray-800 px-3 py-2"
+                    className="text-gray-600 cursor-pointer hover:text-gray-800 px-3 py-2"
                   >
                     Shop
                   </button>
@@ -319,7 +319,7 @@ const Header = memo(() => {
                   </div>
                 </li>
                 <li>
-                  <Link 
+                  <Link
                     to="/about"
                     className="text-gray-600 hover:text-gray-800 px-3 py-2"
                   >
@@ -327,7 +327,7 @@ const Header = memo(() => {
                   </Link>
                 </li>
                 <li>
-                  <Link 
+                  <Link
                     to="/team"
                     className="text-gray-600 hover:text-gray-800 px-3 py-2"
                   >
@@ -335,7 +335,7 @@ const Header = memo(() => {
                   </Link>
                 </li>
                 <li>
-                  <Link 
+                  <Link
                     to="/contact"
                     className="text-gray-600 hover:text-gray-800 px-3 py-2"
                   >
