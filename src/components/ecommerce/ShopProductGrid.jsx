@@ -1,16 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import ShopProductCard from './ShopProductCard';
+import { fetchProducts, setLimit, setOffset } from '../../actions/productActions';
 
 const ShopProductGrid = ({ className = "" }) => {
-  const products = Array.from({ length: 20 }, (_, index) => ({
-    id: index + 1,
-    title: 'Graphic Design',
-    category: 'English Department',
-    price: 16.48,
-    oldPrice: 6.48,
-    image: `https://picsum.photos/400/500?random=${index + 1}`,
-    colors: ['#23A6F0', '#2DC071', '#E77C40', '#252B42']
-  }));
+  const dispatch = useDispatch();
+  const { products, limit, offset, total } = useSelector(state => state.product);
+
+  useEffect(() => {
+    dispatch(fetchProducts());
+  }, [dispatch, limit, offset]);
+
+  const handleLoadMore = () => {
+    dispatch(setOffset(offset + limit));
+  };
+
+  const showLoadMore = products.length < total;
 
   return (
     <div className={`w-full ${className}`}>
@@ -19,6 +24,16 @@ const ShopProductGrid = ({ className = "" }) => {
           <ShopProductCard key={product.id} product={product} />
         ))}
       </div>
+      {showLoadMore && (
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={handleLoadMore}
+            className="bg-primary text-white px-6 py-2 rounded hover:bg-primary-dark transition-colors"
+          >
+            Load More
+          </button>
+        </div>
+      )}
     </div>
   );
 };
