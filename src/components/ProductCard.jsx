@@ -13,11 +13,11 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <Card className="group border-none shadow-none">
+    <Card className="group gap-2 pb-10 border-none shadow-none">
       <CardHeader className="p-0">
         <div className="relative overflow-hidden">
           <Link to={`/product/${product.id}`} className="block">
-            <AspectRatio ratio={3/4} className="overflow-hidden">
+            <AspectRatio ratio={3 / 4} className="overflow-hidden">
               <img
                 src={product.images[0]?.url || "https://picsum.photos/300/400"}
                 alt={product.name}
@@ -28,7 +28,7 @@ const ProductCard = ({ product }) => {
         </div>
       </CardHeader>
 
-      <CardContent className="mt-4 text-center p-0">
+      <CardContent className=" text-center p-0">
         <Link to={`/product/${product.id}`}>
           <h3 className="text-base font-medium text-gray-900 hover:text-blue-600">
             {product.name || "English Department"}

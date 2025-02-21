@@ -11,7 +11,7 @@ const ShopProductCard = ({ product }) => {
             <img
               src={product.image}
               alt={product.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover "
             />
           </div>
         </Link>
