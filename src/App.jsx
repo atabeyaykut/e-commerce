@@ -40,12 +40,12 @@ function App() {
                   <HomePage />
                 </Suspense>
               )} />
-              <Route path="/login" component={() => (
+              <Route exact path="/login" component={() => (
                 <Suspense fallback={<LoadingSpinner />}>
                   <LoginPage />
                 </Suspense>
               )} />
-              <Route path="/signup" component={() => (
+              <Route exact path="/signup" component={() => (
                 <Suspense fallback={<LoadingSpinner />}>
                   <SignupPage />
                 </Suspense>
@@ -55,14 +55,19 @@ function App() {
                   <ShopPage />
                 </Suspense>
               )} />
-              <Route exact path="/shop/:category" component={() => (
+              <Route exact path="/shop/:gender" render={({ match }) => (
                 <Suspense fallback={<LoadingSpinner />}>
-                  <ShopPage />
+                  <ShopPage match={match} />
                 </Suspense>
               )} />
-              <Route exact path="/shop/:gender/:category" component={() => (
+              <Route exact path={[
+                "/shop/kadin/:categoryName/:categoryId",
+                "/shop/erkek/:categoryName/:categoryId",
+                "/shop/men/:categoryName/:categoryId",
+                "/shop/women/:categoryName/:categoryId"
+              ]} render={({ match }) => (
                 <Suspense fallback={<LoadingSpinner />}>
-                  <ShopPage />
+                  <ShopPage match={match} />
                 </Suspense>
               )} />
               <Route exact path="/product/:id" component={() => (

@@ -29,11 +29,11 @@ const ShopProductCard = ({ product }) => {
         {/* Price */}
         <div className="mt-2 flex items-center justify-center gap-2">
           <span className="text-lg font-bold text-blue-600">
-            ${product.price.toFixed(2)}
+            {product.price.toFixed(2)}₺
           </span>
           {product.oldPrice && (
             <span className="text-sm text-gray-500 line-through">
-              ${product.oldPrice.toFixed(2)}
+              {product.oldPrice.toFixed(2)}₺
             </span>
           )}
         </div>
