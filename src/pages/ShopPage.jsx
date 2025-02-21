@@ -71,7 +71,7 @@ const ShopPage = () => {
   const dispatch = useDispatch();
   const params = useParams();
   const location = useLocation();
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
   const [initialLoadDone, setInitialLoadDone] = useState(false);
@@ -175,7 +175,7 @@ const ShopPage = () => {
   const paginationRange = useMemo(() => {
     const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE);
     const pageNumbers = [];
-    
+
     if (totalPages <= 7) {
       for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i);
@@ -197,7 +197,7 @@ const ShopPage = () => {
         pageNumbers.push(totalPages);
       }
     }
-    
+
     return pageNumbers;
   }, [currentPage, products.length]);
 
@@ -294,7 +294,7 @@ const ShopPage = () => {
       </div>
 
       {/* Products Grid */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl  mx-auto px-4 py-8">
         {productsError && (
           <div className="text-center text-red-600 mb-4">
             {productsError}
@@ -325,11 +325,10 @@ const ShopPage = () => {
               <button
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
-                className={`relative inline-flex items-center px-2 py-2 rounded-l-md border ${
-                  currentPage === 1
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-white text-gray-500 hover:bg-gray-50'
-                } text-sm font-medium`}
+                className={`relative inline-flex items-center px-2 py-2 rounded-l-md border ${currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-500 hover:bg-gray-50'
+                  } text-sm font-medium`}
               >
                 <span className="sr-only">Önceki</span>
                 <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -353,11 +352,10 @@ const ShopPage = () => {
                   <button
                     key={pageNum}
                     onClick={() => setCurrentPage(pageNum)}
-                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                      currentPage === pageNum
-                        ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                    }`}
+                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === pageNum
+                      ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                      : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                      }`}
                   >
                     {pageNum}
                   </button>
@@ -367,11 +365,10 @@ const ShopPage = () => {
               <button
                 onClick={() => setCurrentPage(prev => Math.min(Math.ceil(products.length / PRODUCTS_PER_PAGE), prev + 1))}
                 disabled={currentPage === Math.ceil(products.length / PRODUCTS_PER_PAGE)}
-                className={`relative inline-flex items-center px-2 py-2 rounded-r-md border ${
-                  currentPage === Math.ceil(products.length / PRODUCTS_PER_PAGE)
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-white text-gray-500 hover:bg-gray-50'
-                } text-sm font-medium`}
+                className={`relative inline-flex items-center px-2 py-2 rounded-r-md border ${currentPage === Math.ceil(products.length / PRODUCTS_PER_PAGE)
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-500 hover:bg-gray-50'
+                  } text-sm font-medium`}
               >
                 <span className="sr-only">Sonraki</span>
                 <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
