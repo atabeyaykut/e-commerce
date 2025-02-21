@@ -6,6 +6,10 @@ const ProductCard = ({ product }) => {
   const defaultColors = ['#000000', '#3B82F6', '#EF4444', '#10B981'];
   const colors = product.colors || defaultColors;
 
+  const formatPrice = (price) => {
+    return `${price.toFixed(2)} ₺`;
+  };
+
   return (
     <div className="group">
       {/* Product Image */}
@@ -33,11 +37,11 @@ const ProductCard = ({ product }) => {
         {/* Price */}
         <div className="mt-2 flex items-center justify-center gap-2">
           <span className="text-lg font-bold text-blue-600">
-            ${(product.price || 16.48).toFixed(2)}
+            {formatPrice(product.price || 16.48)}
           </span>
           {product.oldPrice && (
             <span className="text-sm text-gray-500 line-through">
-              ${product.oldPrice.toFixed(2)}
+              {formatPrice(product.oldPrice)}
             </span>
           )}
         </div>
