@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Grid, List, Filter, Search } from 'lucide-react';
 import { fetchProductsAsync } from '../actions/productActions';
-import { setFilter, setSort, setCategory } from '../store/productsSlice';
+import { setFilter, setSort, setCategory, clearFilters } from '../store/productsSlice';
+import ProductCard from '../components/ProductCard';
 import ShopProductGrid from '../components/ecommerce/ShopProductGrid';
 import PageHeader from '../components/ui/PageHeader';
 import BrandLogos from '../components/ui/BrandLogos';
@@ -63,20 +64,25 @@ const categories = [
   }
 ];
 
+const PRODUCTS_PER_PAGE = 20;
+
 const ShopPage = () => {
-  const params = useParams();
-  const location = useLocation();
   const history = useHistory();
   const dispatch = useDispatch();
-  const [viewMode, setViewMode] = useState('grid');
+  const params = useParams();
+  const location = useLocation();
+  
   const [currentPage, setCurrentPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
   const [initialLoadDone, setInitialLoadDone] = useState(false);
+  const [viewMode, setViewMode] = useState('grid');
+  const [showFilters, setShowFilters] = useState(false);
 
   const {
     products,
     isLoading: productsLoading,
     error: productsError,
+    total,
     queryParams
   } = useSelector((state) => state.products);
 
@@ -165,6 +171,43 @@ const ShopPage = () => {
     history.push(`/shop/${targetGender}/${targetSlug}/${cat.id}`);
   };
 
+  // Pagination calculation
+  const paginationRange = useMemo(() => {
+    const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE);
+    const pageNumbers = [];
+    
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) pageNumbers.push(i);
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) pageNumbers.push(i);
+      } else {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) pageNumbers.push(i);
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      }
+    }
+    
+    return pageNumbers;
+  }, [currentPage, products.length]);
+
+  // Calculate current page products
+  const currentProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    const endIndex = startIndex + PRODUCTS_PER_PAGE;
+    return products.slice(startIndex, endIndex);
+  }, [currentPage, products]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <PageHeader
@@ -199,7 +242,6 @@ const ShopPage = () => {
           </motion.div>
         ))}
       </div>
-
 
       {/* Filters Bar */}
       <div className=" max-w-7xl mx-auto px-4 py-6">
@@ -251,76 +293,97 @@ const ShopPage = () => {
         </div>
       </div>
 
-
-
       {/* Products Grid */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-1'} gap-6`}>
-          {products.map((product) => (
-            <div key={product.id} className={`bg-white rounded-lg shadow-md overflow-hidden ${viewMode === 'list' ? 'flex' : ''}`}>
-              <div className={`${viewMode === 'list' ? 'w-1/3' : 'w-full'}`}>
-                <img
-                  src={product.images[0]?.url || "https://picsum.photos/300/400"}
-                  alt={product.name}
-                  className="w-full h-64 object-cover"
-                />
-              </div>
-              <div className={`p-4 ${viewMode === 'list' ? 'w-2/3' : 'w-full'}`}>
-                <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
-                {viewMode === 'list' && (
-                  <p className="text-gray-600 mb-4">{product.description}</p>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className="text-xl font-bold text-primary">
-                    ₺{product.price.toFixed(2)}
-                  </span>
-                  <div className="flex items-center">
-                    <span className="text-yellow-400 mr-1">★</span>
-                    <span className="text-gray-600">{product.rating?.toFixed(1) || "N/A"}</span>
-                  </div>
-                </div>
-                <button className="mt-4 w-full bg-primary text-white py-2 rounded-md hover:bg-primary-dark transition-colors">
-                  Add to Cart
-                </button>
-              </div>
+        {productsError && (
+          <div className="text-center text-red-600 mb-4">
+            {productsError}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {productsLoading ? (
+            <div className="flex justify-center items-center min-h-[400px]">
+              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
             </div>
-          ))}
+          ) : products.length === 0 ? (
+            <div className="text-center py-12">
+              <h3 className="text-xl font-semibold text-gray-700">Ürün bulunamadı</h3>
+              <p className="text-gray-500 mt-2">Lütfen farklı bir arama yapmayı deneyin</p>
+            </div>
+          ) : (
+            currentProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          )}
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-center mt-8">
-          <div className="inline-flex rounded-lg overflow-hidden">
-            <button
-              className="px-4 md:px-6 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 border-r border-gray-300 text-sm md:text-base"
-              onClick={() => setCurrentPage(1)}
-            >
-              First
-            </button>
-            <button
-              className="px-4 md:px-6 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 border-r border-gray-300 text-sm md:text-base"
-            >
-              1
-            </button>
-            <button
-              className="px-4 md:px-6 py-2 bg-blue-500 text-white text-sm md:text-base"
-            >
-              2
-            </button>
-            <button
-              className="px-4 md:px-6 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 border-l border-gray-300 text-sm md:text-base"
-            >
-              3
-            </button>
-            <button
-              className="px-4 md:px-6 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 border-l border-gray-300 text-sm md:text-base"
-            >
-              Next
-            </button>
-          </div>
-        </div>
+        {!productsLoading && products.length > PRODUCTS_PER_PAGE && (
+          <div className="flex justify-center mt-8">
+            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className={`relative inline-flex items-center px-2 py-2 rounded-l-md border ${
+                  currentPage === 1
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-white text-gray-500 hover:bg-gray-50'
+                } text-sm font-medium`}
+              >
+                <span className="sr-only">Önceki</span>
+                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </button>
 
-        <BrandLogos />
+              {paginationRange.map((pageNum, index) => {
+                if (pageNum === '...') {
+                  return (
+                    <span
+                      key={`dots-${index}`}
+                      className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
+                    >
+                      ...
+                    </span>
+                  );
+                }
+
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                      currentPage === pageNum
+                        ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(Math.ceil(products.length / PRODUCTS_PER_PAGE), prev + 1))}
+                disabled={currentPage === Math.ceil(products.length / PRODUCTS_PER_PAGE)}
+                className={`relative inline-flex items-center px-2 py-2 rounded-r-md border ${
+                  currentPage === Math.ceil(products.length / PRODUCTS_PER_PAGE)
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-white text-gray-500 hover:bg-gray-50'
+                } text-sm font-medium`}
+              >
+                <span className="sr-only">Sonraki</span>
+                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </nav>
+          </div>
+        )}
       </div>
+
+      <BrandLogos />
     </div>
   );
 };
