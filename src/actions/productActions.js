@@ -1,3 +1,5 @@
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
 import api from '../utils/axios';
 
 // Action Types
@@ -55,7 +57,38 @@ export const setFilter = (filter) => ({
   payload: filter
 });
 
-// Thunk Actions
+// New Redux Toolkit Thunk Action
+export const fetchProductsAsync = createAsyncThunk(
+  'products/fetchProducts',
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const queryParams = new URLSearchParams();
+      
+      if (params.category) {
+        queryParams.append('category', params.category);
+      }
+      if (params.filter) {
+        queryParams.append('filter', params.filter);
+      }
+      if (params.sort) {
+        queryParams.append('sort', params.sort);
+      }
+
+      const queryString = queryParams.toString();
+      const url = `https://workintech-fe-ecommerce.onrender.com/products${queryString ? `?${queryString}` : ''}`;
+      
+      const response = await axios.get(url);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 
+        'Failed to fetch products. Please try again later.'
+      );
+    }
+  }
+);
+
+// Original Thunk Actions
 export const fetchProducts = (params = {}) => async (dispatch, getState) => {
   dispatch(setFetchState(FETCH_STATES.FETCHING));
 
@@ -83,8 +116,7 @@ export const fetchProducts = (params = {}) => async (dispatch, getState) => {
 
 export const fetchCategories = () => async (dispatch, getState) => {
   const { categories } = getState().product;
-  
-  // Return if categories are already loaded
+
   if (categories.length > 0) {
     return categories;
   }
