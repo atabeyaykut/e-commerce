@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 const ProductCard = ({ product }) => {
   // Örnek renk seçenekleri (API'den gelmiyorsa)
@@ -11,30 +13,31 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <div className="group">
-      {/* Product Image */}
-      <div className="relative overflow-hidden">
-        <Link to={`/product/${product.id}`} className="block">
-          <div className="aspect-[3/4]">
-            <img
-              src={product.images[0]?.url || "https://picsum.photos/300/400"}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </Link>
-      </div>
+    <Card className="group border-none shadow-none">
+      <CardHeader className="p-0">
+        <div className="relative overflow-hidden">
+          <Link to={`/product/${product.id}`} className="block">
+            <AspectRatio ratio={3/4} className="overflow-hidden">
+              <img
+                src={product.images[0]?.url || "https://picsum.photos/300/400"}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+            </AspectRatio>
+          </Link>
+        </div>
+      </CardHeader>
 
-      {/* Product Info */}
-      <div className="mt-4 text-center">
+      <CardContent className="mt-4 text-center p-0">
         <Link to={`/product/${product.id}`}>
           <h3 className="text-base font-medium text-gray-900 hover:text-blue-600">
             {product.name || "English Department"}
           </h3>
         </Link>
-        <div className="text-sm text-gray-500 mt-1">{product.category || "Graphic Design"}</div>
+        <div className="text-sm text-gray-500 mt-1">
+          {product.category || "Graphic Design"}
+        </div>
 
-        {/* Price */}
         <div className="mt-2 flex items-center justify-center gap-2">
           <span className="text-lg font-bold text-blue-600">
             {formatPrice(product.price || 16.48)}
@@ -46,7 +49,6 @@ const ProductCard = ({ product }) => {
           )}
         </div>
 
-        {/* Color Options */}
         <div className="mt-3 flex items-center justify-center gap-2">
           {colors.map((color, index) => (
             <div
@@ -56,8 +58,8 @@ const ProductCard = ({ product }) => {
             />
           ))}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

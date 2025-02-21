@@ -1,73 +1,87 @@
 import React from 'react';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
-import Slider from 'react-slick';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
+import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
 
 const HeroSlider = () => {
   const slides = [
     {
       id: 1,
-      image: 'https://picsum.photos/1920/600?random=1',
-      season: 'Summer 2024',
-      title: 'NEW COLLECTION',
-      description: 'We know how large objects will act, but things on a small scale just do not act that way.',
+      image: 'https://picsum.photos/1920/1080?random=1',
+      title: 'Summer Collection',
+      description: 'New Arrivals For Summer',
+      buttonText: 'SHOP NOW',
+      link: '/shop'
     },
     {
       id: 2,
-      image: 'https://picsum.photos/1920/600?random=2',
-      season: 'Winter 2024',
-      title: 'SEASONAL DEALS',
-      description: 'Discover our latest winter collection with amazing discounts on selected items.',
+      image: 'https://picsum.photos/1920/1080?random=2',
+      title: 'Winter Collection',
+      description: 'New Arrivals For Winter',
+      buttonText: 'SHOP NOW',
+      link: '/shop'
     },
     {
       id: 3,
-      image: 'https://picsum.photos/1920/600?random=3',
-      season: 'Spring 2024',
-      title: 'FRESH ARRIVALS',
-      description: 'Explore our new spring collection featuring vibrant colors and modern designs.',
+      image: 'https://picsum.photos/1920/1080?random=3',
+      title: 'Spring Collection',
+      description: 'New Arrivals For Spring',
+      buttonText: 'SHOP NOW',
+      link: '/shop'
     }
   ];
 
-  const settings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 5000,
-    fade: true,
-  };
+  const [emblaRef] = useEmblaCarousel({ loop: true }, [Autoplay()]);
 
   return (
-    <Slider {...settings}>
-      {slides.map((slide) => (
-        <div key={slide.id}>
-          <div
-            className="relative h-[650px] bg-cover bg-center"
-            style={{ backgroundImage: `url(${slide.image})` }}
-          >
-            <div className="absolute inset-0 bg-black bg-opacity-40" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-white">
-                <span className="text-sm font-semibold uppercase tracking-wider">{slide.season}</span>
-                <h1 className="mt-4 text-5xl font-bold">{slide.title}</h1>
-                <p className="mt-4 text-lg max-w-xl mx-auto">
-                  {slide.description}
-                </p>
-                <Link
-                  to="/"
-                  className="mt-8 inline-block px-8 py-3 bg-white text-gray-900 font-semibold rounded-md hover:bg-gray-100 transition-colors"
+    <Carousel 
+      ref={emblaRef}
+      className="w-full"
+      opts={{
+        align: 'start',
+        loop: true,
+      }}
+    >
+      <CarouselContent>
+        {slides.map((slide) => (
+          <CarouselItem key={slide.id}>
+            <AspectRatio ratio={16/9} className="relative overflow-hidden">
+              <img
+                src={slide.image}
+                alt={slide.title}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/30" />
+              <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center">
+                <h2 className="text-4xl md:text-6xl font-bold mb-4">{slide.title}</h2>
+                <p className="text-lg md:text-xl mb-8">{slide.description}</p>
+                <Button 
+                  asChild
+                  variant="outline" 
+                  size="lg"
+                  className="bg-transparent text-white border-white hover:bg-white hover:text-black transition-colors"
                 >
-                  SHOP NOW
-                </Link>
+                  <Link to={slide.link}>
+                    {slide.buttonText}
+                  </Link>
+                </Button>
               </div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </Slider>
+            </AspectRatio>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+      <CarouselPrevious className="left-4 bg-white/20 hover:bg-white/40 text-white border-none" />
+      <CarouselNext className="right-4 bg-white/20 hover:bg-white/40 text-white border-none" />
+    </Carousel>
   );
 };
 

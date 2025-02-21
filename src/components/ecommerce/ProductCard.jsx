@@ -1,61 +1,74 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Heart, ShoppingCart } from 'lucide-react';
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Button } from "@/components/ui/button";
+import { Heart, ShoppingCart } from "lucide-react";
 
 const ProductCard = ({ product }) => {
+  const {
+    name,
+    price,
+    image,
+    colors = ['#FF0000', '#00FF00', '#0000FF'],
+    category = 'Category',
+    isNew = false,
+    isSale = false,
+    salePrice,
+  } = product;
+
   return (
-    <div className="group">
-      <div className="relative overflow-hidden rounded-lg aspect-[4/5]">
-        <Link to={`/product/${product.id}`}>
-          <div className="w-full h-full">
+    <Card className="group overflow-hidden border-none shadow-none">
+      <CardHeader className="p-0">
+        <div className="relative">
+          <AspectRatio ratio={1}>
             <img
-              src={product.image}
-              alt={product.name}
+              src={image}
+              alt={name}
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
             />
+          </AspectRatio>
+          <div className="absolute top-4 left-4 flex flex-col gap-2">
+            {product.sale && (
+              <span className="bg-red-600 text-white text-xs px-2 py-1 rounded">
+                Sale
+              </span>
+            )}
           </div>
-        </Link>
-        
-        {/* Quick Actions */}
-        <div className="absolute top-2 md:top-4 right-2 md:right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="p-1.5 md:p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors">
-            <Heart className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
-          </button>
-          <button className="p-1.5 md:p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors">
-            <ShoppingCart className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
-          </button>
-        </div>
-
-        {/* Sale Badge */}
-        {product.sale && (
-          <div className="absolute top-2 md:top-4 left-2 md:left-4 bg-red-500 text-white px-2 py-0.5 md:py-1 text-xs md:text-sm rounded">
-            Sale
+          <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 rounded-full bg-white hover:bg-gray-100"
+            >
+              <Heart className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 rounded-full bg-white hover:bg-gray-100"
+            >
+              <ShoppingCart className="h-4 w-4" />
+            </Button>
           </div>
-        )}
-      </div>
-
-      {/* Product Info */}
-      <div className="mt-2 md:mt-4">
-        <div className="text-xs md:text-sm text-gray-500 mb-0.5 md:mb-1">{product.category}</div>
-        <Link to={`/product/${product.id}`}>
-          <h3 className="text-sm md:text-base font-medium text-gray-900 hover:text-blue-600 transition-colors line-clamp-2">
-            {product.title}
-          </h3>
-        </Link>
-
-        {/* Price */}
-        <div className="mt-1 md:mt-2 flex items-center gap-2">
-          <span className="text-sm md:text-lg font-semibold text-gray-900">
-            ${product.price.toFixed(2)}
-          </span>
-          {product.oldPrice && (
-            <span className="text-xs md:text-sm text-gray-500 line-through">
-              ${product.oldPrice.toFixed(2)}
-            </span>
-          )}
         </div>
-
-        {/* Rating */}
+      </CardHeader>
+      <CardContent className="p-4">
+        <div className="mb-2">
+          <span className="text-sm text-gray-500">{product.category}</span>
+        </div>
+        <h3 className="text-lg font-medium mb-2">{product.title}</h3>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {product.oldPrice ? (
+              <>
+                <span className="text-gray-400 line-through">${product.oldPrice.toFixed(2)}</span>
+                <span className="text-red-600">${product.price.toFixed(2)}</span>
+              </>
+            ) : (
+              <span>${product.price.toFixed(2)}</span>
+            )}
+          </div>
+        </div>
         <div className="mt-1 md:mt-2 flex items-center">
           {[...Array(5)].map((_, index) => (
             <svg
@@ -70,8 +83,8 @@ const ProductCard = ({ product }) => {
             </svg>
           ))}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
