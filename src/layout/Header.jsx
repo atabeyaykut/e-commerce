@@ -1,8 +1,9 @@
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, useCallback, memo, useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 import { Search, ShoppingCart, Heart, Menu, X, Phone, Mail, User } from 'lucide-react';
 import md5 from 'md5';
+import api from '../services/api';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -20,134 +21,75 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const API_URL = 'https://workintech-fe-ecommerce.onrender.com';
-
-const mockCategories = [
-  {
-    "id": 1,
-    "code": "k:tisort",
-    "title": "Tişört",
-    "img": `${API_URL}/assets/category-img/category_kadın_tişört.jpg`,
-    "rating": 4.2,
-    "gender": "k"
-  },
-  {
-    "id": 2,
-    "code": "k:ayakkabi",
-    "title": "Ayakkabı",
-    "img": `${API_URL}/assets/category-img/category_kadın_ayakkabı.jpg`,
-    "rating": 4.9,
-    "gender": "k"
-  },
-  {
-    "id": 3,
-    "code": "k:ceket",
-    "title": "Ceket",
-    "img": `${API_URL}/assets/category-img/category_kadın_ceket.jpg`,
-    "rating": 3.8,
-    "gender": "k"
-  },
-  {
-    "id": 4,
-    "code": "k:elbise",
-    "title": "Elbise",
-    "img": `${API_URL}/assets/category-img/category_kadın_elbise.jpg`,
-    "rating": 4.1,
-    "gender": "k"
-  },
-  {
-    "id": 5,
-    "code": "k:etek",
-    "title": "Etek",
-    "img": `${API_URL}/assets/category-img/category_kadın_etek.jpg`,
-    "rating": 3.9,
-    "gender": "k"
-  },
-  {
-    "id": 6,
-    "code": "k:gomlek",
-    "title": "Gömlek",
-    "img": `${API_URL}/assets/category-img/category_kadın_gömlek.jpg`,
-    "rating": 3.1,
-    "gender": "k"
-  },
-  {
-    "id": 7,
-    "code": "k:kazak",
-    "title": "Kazak",
-    "img": `${API_URL}/assets/category-img/category_kadın_kazak.jpg`,
-    "rating": 2.9,
-    "gender": "k"
-  },
-  {
-    "id": 8,
-    "code": "k:pantalon",
-    "title": "Pantalon",
-    "img": `${API_URL}/assets/category-img/category_kadın_pantalon.jpg`,
-    "rating": 3.8,
-    "gender": "k"
-  },
-  {
-    "id": 9,
-    "code": "e:ayakkabı",
-    "title": "Ayakkabı",
-    "img": `${API_URL}/assets/category-img/category_erkek_ayakkabı.jpg`,
-    "rating": 4.6,
-    "gender": "e"
-  },
-  {
-    "id": 10,
-    "code": "e:ceket",
-    "title": "Ceket",
-    "img": `${API_URL}/assets/category-img/category_erkek_ceket.jpg`,
-    "rating": 4.1,
-    "gender": "e"
-  },
-  {
-    "id": 11,
-    "code": "e:gomlek",
-    "title": "Gömlek",
-    "img": `${API_URL}/assets/category-img/category_erkek_gömlek.jpg`,
-    "rating": 3.9,
-    "gender": "e"
-  },
-  {
-    "id": 12,
-    "code": "e:kazak",
-    "title": "Kazak",
-    "img": `${API_URL}/assets/category-img/category_erkek_kazak.jpg`,
-    "rating": 3.2,
-    "gender": "e"
-  },
-  {
-    "id": 13,
-    "code": "e:pantalon",
-    "title": "Pantalon",
-    "img": `${API_URL}/assets/category-img/category_erkek_pantalon.jpg`,
-    "rating": 3.5,
-    "gender": "e"
-  },
-  {
-    "id": 14,
-    "code": "e:tisort",
-    "title": "Tişört",
-    "img": `${API_URL}/assets/category-img/category_erkek_tişört.jpg`,
-    "rating": 4.3,
-    "gender": "e"
-  }
-];
-
 const Header = memo(() => {
   const { isAuthenticated, user, logout } = useAuthStore();
   const history = useHistory();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/categories');
+      const transformedCategories = response.data.map(category => ({
+        ...category,
+        displayTitle: getCategoryDisplayTitle(category.title)
+      }));
+      setCategories(transformedCategories);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      setError('Failed to load categories');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to convert Turkish category titles to English
+  const getCategoryDisplayTitle = (title) => {
+    const titleMap = {
+      'Tişört': 'T-Shirt',
+      'Ayakkabı': 'Shoes',
+      'Ceket': 'Jacket',
+      'Elbise': 'Dress',
+      'Etek': 'Skirt',
+      'Gömlek': 'Shirt',
+      'Kazak': 'Sweater',
+      'Pantalon': 'Pants'
+    };
+    return titleMap[title] || title;
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    let timer;
+    const avatarContainer = document.querySelector('.avatar-container');
+    const profileMenu = document.querySelector('.profile-menu');
+
+    if (avatarContainer && profileMenu) {
+      avatarContainer.addEventListener('mouseleave', () => {
+        timer = setTimeout(() => {
+          profileMenu.style.display = 'none';
+        }, 100);
+      });
+    }
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const gravatarUrl = user ? `https://www.gravatar.com/avatar/${md5(user.email.toLowerCase().trim())}?s=32&d=identicon` : '';
 
   const handleLogout = useCallback(() => {
     logout();
     history.push('/');
   }, [logout, history]);
-
-  const gravatarUrl = user ? `https://www.gravatar.com/avatar/${md5(user.email.toLowerCase().trim())}?s=32&d=identicon` : '';
 
   return (
     <header className="bg-white shadow-sm">
@@ -220,90 +162,112 @@ const Header = memo(() => {
                   </button>
                   <div className="invisible group-hover:visible absolute top-full left-1/2 -translate-x-1/2 w-[800px] bg-white rounded-lg shadow-lg border border-gray-100 p-6 z-50">
                     <div className="grid grid-cols-2 gap-12">
-                      {/* Kadın Kategorileri */}
+                      {/* Women Categories */}
                       <div>
-                        <h3 className="text-xl font-semibold mb-4 text-gray-800">Kadın</h3>
+                        <h3 className="text-xl font-semibold mb-4 text-gray-800">Women</h3>
                         <div className="space-y-3">
-                          {mockCategories.filter(cat => cat.gender === 'k').map((category) => (
-                            <div
-                              key={category.id}
-                              className="group cursor-pointer"
-                              onClick={() => {
-                                const slug = category.title
-                                  .toLowerCase()
-                                  .replace(/\s+/g, '-')
-                                  .replace(/[ğ]/g, 'g')
-                                  .replace(/[ü]/g, 'u')
-                                  .replace(/[ş]/g, 's')
-                                  .replace(/[ı]/g, 'i')
-                                  .replace(/[ö]/g, 'o')
-                                  .replace(/[ç]/g, 'c')
-                                  .replace(/[^a-z0-9-]/g, '');
-                                history.push(`/shop/kadin/${slug}/${category.id}`);
-                              }}
-                            >
-                              <div className="flex items-center">
-                                <img
-                                  src={category.img}
-                                  alt={category.title}
-                                  className="w-10 h-10 object-cover rounded-lg mr-3"
-                                  onError={(e) => {
-                                    e.target.src = `${API_URL}/assets/category-img/default.jpg`;
-                                  }}
-                                />
-                                <span className="text-gray-700 hover:text-blue-600 transition-colors duration-200">{category.title}</span>
+                          {loading ? (
+                            <div className="text-center py-4">Loading categories...</div>
+                          ) : error ? (
+                            <div className="text-center text-red-500 py-4">{error}</div>
+                          ) : (
+                            categories.filter(cat => cat.gender === 'k').map((category) => (
+                              <div
+                                key={category.id}
+                                className="flex items-center justify-between hover:bg-gray-50 p-2 rounded-lg cursor-pointer"
+                                onClick={() => {
+                                  const slug = category.title
+                                    .toLowerCase()
+                                    .replace(/[ı]/g, 'i')
+                                    .replace(/[ğ]/g, 'g')
+                                    .replace(/[ü]/g, 'u')
+                                    .replace(/[ş]/g, 's')
+                                    .replace(/[ö]/g, 'o')
+                                    .replace(/[ç]/g, 'c')
+                                    .replace(/[^a-z0-9-]/g, '');
+                                  history.push(`/shop/kadin/${slug}/${category.id}`);
+                                }}
+                              >
+                                <div className="flex items-center">
+                                  <img
+                                    src={category.img}
+                                    alt={category.displayTitle}
+                                    className="w-12 h-12 object-cover rounded-lg"
+                                    onError={(e) => {
+                                      e.target.src = `${api.defaults.baseURL}/assets/default-category.jpg`;
+                                    }}
+                                  />
+                                  <span className="ml-3 text-gray-700">{category.displayTitle}</span>
+                                </div>
+                                {category.rating && (
+                                  <div className="flex items-center text-sm text-gray-500">
+                                    <span className="mr-2">{category.rating}</span>
+                                    <span>★</span>
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                          ))}
+                            ))
+                          )}
                           <div
                             className="flex items-center text-blue-600 hover:text-blue-700 cursor-pointer mt-4 font-medium"
                             onClick={() => history.push('/shop/kadin')}
                           >
-                            Tümünü Gör →
+                            View All →
                           </div>
                         </div>
                       </div>
 
-                      {/* Erkek Kategorileri */}
+                      {/* Men Categories */}
                       <div>
-                        <h3 className="text-xl font-semibold mb-4 text-gray-800">Erkek</h3>
+                        <h3 className="text-xl font-semibold mb-4 text-gray-800">Men</h3>
                         <div className="space-y-3">
-                          {mockCategories.filter(cat => cat.gender === 'e').map((category) => (
-                            <div
-                              key={category.id}
-                              className="group cursor-pointer"
-                              onClick={() => {
-                                const slug = category.title
-                                  .toLowerCase()
-                                  .replace(/\s+/g, '-')
-                                  .replace(/[ğ]/g, 'g')
-                                  .replace(/[ü]/g, 'u')
-                                  .replace(/[ş]/g, 's')
-                                  .replace(/[ı]/g, 'i')
-                                  .replace(/[ö]/g, 'o')
-                                  .replace(/[ç]/g, 'c')
-                                  .replace(/[^a-z0-9-]/g, '');
-                                history.push(`/shop/erkek/${slug}/${category.id}`);
-                              }}
-                            >
-                              <div className="flex items-center">
-                                <img
-                                  src={category.img}
-                                  alt={category.title}
-                                  className="w-10 h-10 object-cover rounded-lg mr-3"
-                                  onError={(e) => {
-                                    e.target.src = `${API_URL}/assets/category-img/default.jpg`;
-                                  }}
-                                />
-                                <span className="text-gray-700 hover:text-blue-600 transition-colors duration-200">{category.title}</span>
+                          {loading ? (
+                            <div className="text-center py-4">Loading categories...</div>
+                          ) : error ? (
+                            <div className="text-center text-red-500 py-4">{error}</div>
+                          ) : (
+                            categories.filter(cat => cat.gender === 'e').map((category) => (
+                              <div
+                                key={category.id}
+                                className="flex items-center justify-between hover:bg-gray-50 p-2 rounded-lg cursor-pointer"
+                                onClick={() => {
+                                  const slug = category.title
+                                    .toLowerCase()
+                                    .replace(/[ı]/g, 'i')
+                                    .replace(/[ğ]/g, 'g')
+                                    .replace(/[ü]/g, 'u')
+                                    .replace(/[ş]/g, 's')
+                                    .replace(/[ö]/g, 'o')
+                                    .replace(/[ç]/g, 'c')
+                                    .replace(/[^a-z0-9-]/g, '');
+                                  history.push(`/shop/erkek/${slug}/${category.id}`);
+                                }}
+                              >
+                                <div className="flex items-center">
+                                  <img
+                                    src={category.img}
+                                    alt={category.displayTitle}
+                                    className="w-12 h-12 object-cover rounded-lg"
+                                    onError={(e) => {
+                                      e.target.src = `${api.defaults.baseURL}/assets/default-category.jpg`;
+                                    }}
+                                  />
+                                  <span className="ml-3 text-gray-700">{category.displayTitle}</span>
+                                </div>
+                                {category.rating && (
+                                  <div className="flex items-center text-sm text-gray-500">
+                                    <span className="mr-2">{category.rating}</span>
+                                    <span>★</span>
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                          ))}
+                            ))
+                          )}
                           <div
                             className="flex items-center text-blue-600 hover:text-blue-700 cursor-pointer mt-4 font-medium"
                             onClick={() => history.push('/shop/erkek')}
                           >
-                            Tümünü Gör →
+                            View All →
                           </div>
                         </div>
                       </div>
@@ -313,7 +277,7 @@ const Header = memo(() => {
                         onClick={() => history.push('/shop')}
                         className="w-full text-center text-blue-600 hover:text-blue-700 font-medium"
                       >
-                        Tüm Ürünleri Gör
+                        View All Products
                       </button>
                     </div>
                   </div>
