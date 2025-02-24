@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Card, CardHeader, CardContent } from "./ui/card";
+import { AspectRatio } from "./ui/aspect-ratio";
 import { createSlug } from '../utils/stringUtils';
 import { useDispatch } from 'react-redux';
 import { ShoppingCart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from './ui/button'; 
 import { addToCart } from '../store/slices/cartSlice';
 
 const ProductCard = ({ product }) => {
@@ -60,7 +60,7 @@ const ProductCard = ({ product }) => {
               className="w-full text-gray-900 hover:bg-gray-100 flex items-center justify-center gap-2 cursor-pointer"
             >
               <ShoppingCart className="h-4 w-4" />
-              Sepete Ekle
+              Add to cart
             </Button>
           </div>
         </div>
