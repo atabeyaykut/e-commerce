@@ -161,12 +161,12 @@ const Header = memo(() => {
                   >
                     Shop
                   </button>
-                  <div className="invisible group-hover:visible absolute top-full left-1/2 -translate-x-1/2 w-[800px] bg-white rounded-lg shadow-lg border border-gray-100 p-6 z-50">
-                    <div className="grid grid-cols-2 gap-12">
+                  <div className="invisible group-hover:visible absolute top-full left-1/4 -translate-x-1/3 w-[450px] bg-white rounded-lg shadow-lg border border-gray-100 py-5 z-50">
+                    <div className="flex justify-between px-14 gap-2">
                       {/* Women Categories */}
                       <div>
                         <h3 className="text-xl font-semibold mb-4 text-gray-800">Women</h3>
-                        <div className="space-y-3">
+                        <div className="space-y-1">
                           {loading ? (
                             <div className="text-center py-4">Loading categories...</div>
                           ) : error ? (
@@ -175,7 +175,7 @@ const Header = memo(() => {
                             categories.filter(cat => cat.gender === 'k').map((category) => (
                               <div
                                 key={category.id}
-                                className="flex items-center justify-between hover:bg-gray-50 p-2 rounded-lg cursor-pointer"
+                                className="flex items-center justify-between hover:bg-gray-50 p-1 rounded-lg cursor-pointer"
                                 onClick={() => {
                                   const slug = category.title
                                     .toLowerCase()
@@ -193,14 +193,14 @@ const Header = memo(() => {
                                   <img
                                     src={category.img}
                                     alt={category.displayTitle}
-                                    className="w-12 h-12 object-cover rounded-lg"
+                                    className="w-10 h-10 object-cover rounded-lg"
                                     onError={(e) => {
                                       e.target.src = `${api.defaults.baseURL}/assets/default-category.jpg`;
                                     }}
                                   />
                                   <span className="ml-3 text-gray-700">{category.displayTitle}</span>
                                 </div>
-                                
+
                               </div>
                             ))
                           )}
@@ -216,7 +216,7 @@ const Header = memo(() => {
                       {/* Men Categories */}
                       <div>
                         <h3 className="text-xl font-semibold mb-4 text-gray-800">Men</h3>
-                        <div className="space-y-3">
+                        <div className="space-y-1">
                           {loading ? (
                             <div className="text-center py-4">Loading categories...</div>
                           ) : error ? (
@@ -225,7 +225,7 @@ const Header = memo(() => {
                             categories.filter(cat => cat.gender === 'e').map((category) => (
                               <div
                                 key={category.id}
-                                className="flex items-center justify-between hover:bg-gray-50 p-2 rounded-lg cursor-pointer"
+                                className="flex items-center justify-between hover:bg-gray-50 p-1 rounded-lg cursor-pointer"
                                 onClick={() => {
                                   const slug = category.title
                                     .toLowerCase()
@@ -243,14 +243,13 @@ const Header = memo(() => {
                                   <img
                                     src={category.img}
                                     alt={category.displayTitle}
-                                    className="w-12 h-12 object-cover rounded-lg"
+                                    className="w-10 h-10 object-cover rounded-lg"
                                     onError={(e) => {
                                       e.target.src = `${api.defaults.baseURL}/assets/default-category.jpg`;
                                     }}
                                   />
                                   <span className="ml-3 text-gray-700">{category.displayTitle}</span>
                                 </div>
-                                
                               </div>
                             ))
                           )}
@@ -350,9 +349,9 @@ const Header = memo(() => {
                   </Link>
                 </Button>
                 <div className="relative group">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="text-gray-600 hover:text-gray-800 hover:bg-transparent p-0 relative group-hover:text-orange-500 cursor-pointer"
                     asChild
                   >
@@ -365,7 +364,7 @@ const Header = memo(() => {
                     <CartDropdown />
                   </div>
                 </div>
-                
+
               </div>
 
               {/* Mobile Menu Button */}
