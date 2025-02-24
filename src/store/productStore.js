@@ -144,7 +144,18 @@ const productStore = (set, get) => ({
       
       return null;
     }
-  }
+  },
+
+  // Fetch a single product by ID
+  getProductById: async (productId) => {
+    try {
+      const response = await api.get(`/products/${productId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      throw error;
+    }
+  },
 });
 
 // Create store with devtools

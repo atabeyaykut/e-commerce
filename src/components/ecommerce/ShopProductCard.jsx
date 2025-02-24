@@ -1,56 +1,52 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ShoppingCart } from 'lucide-react';
+import { Button } from '../ui/button';
+import { createSlug } from '../../utils/stringUtils';
 
-const ShopProductCard = ({ product }) => {
+const ShopProductCard = ({ product, onAddToCart }) => {
+  const getProductUrl = () => {
+    const gender = product.gender || 'unisex';
+    const categorySlug = createSlug(product.category.name);
+    const nameSlug = createSlug(product.name);
+    return `/shop/${gender}/${categorySlug}/${product.category.id}/${nameSlug}/${product.id}`;
+  };
+
   return (
-    <div className="group">
-      {/* Product Image */}
-      <div className="relative overflow-hidden">
-        <Link to={`/product/${product.id}`} className="block">
-          <div className="aspect-[3/4]">
-            <img
-              src={product.image}
-              alt={product.title}
-              className="w-full h-full object-cover "
-            />
+    <div className="group relative">
+      <Link to={getProductUrl()} className="block cursor-pointer">
+        <div className="relative aspect-square overflow-hidden rounded-lg">
+          <img
+            src={product.images[0]?.url}
+            alt={product.name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Button
+              onClick={(e) => onAddToCart(e, product)}
+              variant="default"
+              className="w-full text-gray-900 hover:bg-gray-100 flex items-center justify-center gap-2 cursor-pointer transition-colors duration-200"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              Add to cart
+            </Button>
           </div>
-        </Link>
-      </div>
-
-      {/* Product Info */}
-      <div className="mt-4 text-center">
-        <Link to={`/product/${product.id}`}>
-          <h3 className="text-base font-medium text-gray-900 hover:text-blue-600">
-            {product.title}
-          </h3>
-        </Link>
-        <div className="text-sm text-gray-500 mt-1">{product.category}</div>
-
-        {/* Price */}
-        <div className="mt-2 flex items-center justify-center gap-2">
-          <span className="text-lg font-bold text-blue-600">
-            {product.price.toFixed(2)}₺
-          </span>
-          {product.oldPrice && (
-            <span className="text-sm text-gray-500 line-through">
-              {product.oldPrice.toFixed(2)}₺
-            </span>
-          )}
         </div>
-
-        {/* Color Options */}
-        {product.colors && (
-          <div className="mt-3 flex items-center justify-center gap-2">
-            {product.colors.map((color, index) => (
-              <div
-                key={index}
-                className="w-3 h-3 rounded-full cursor-pointer"
-                style={{ backgroundColor: color }}
-              />
-            ))}
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600">{product.name}</h3>
+          <p className="text-sm text-gray-500">{product.category.name}</p>
+          <div className="mt-2 flex items-center justify-between">
+            <p className="text-sm font-medium text-gray-900">
+              {product.price.toFixed(2)} TL
+            </p>
+            {product.oldPrice && (
+              <p className="text-sm text-gray-500 line-through">
+                {product.oldPrice.toFixed(2)} TL
+              </p>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      </Link>
     </div>
   );
 };

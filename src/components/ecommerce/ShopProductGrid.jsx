@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { useEffect, useDispatch, useSelector } from 'react';
 import ShopProductCard from './ShopProductCard';
-import { fetchProducts, setLimit, setOffset } from '../../actions/productActions';
+import { fetchProducts, setOffset } from '../../actions/productActions';
+import { addToCart } from '../../store/slices/cartSlice';
 
 const ShopProductGrid = ({ className = "" }) => {
   const dispatch = useDispatch();
@@ -15,13 +16,18 @@ const ShopProductGrid = ({ className = "" }) => {
     dispatch(setOffset(offset + limit));
   };
 
+  const handleAddToCart = (e, product) => {
+    e.preventDefault();
+    dispatch(addToCart(product));
+  };
+
   const showLoadMore = products.length < total;
 
   return (
     <div className={`w-full ${className}`}>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
         {products.map((product) => (
-          <ShopProductCard key={product.id} product={product} />
+          <ShopProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
         ))}
       </div>
       {showLoadMore && (

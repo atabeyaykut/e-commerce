@@ -3,8 +3,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ShoppingCart } from 'lucide-react';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../../store/slices/cartSlice';
 
 const BestsellerProducts = () => {
+  const dispatch = useDispatch();
+  
+  const handleAddToCart = (e, product) => {
+    e.preventDefault();
+    dispatch(addToCart(product));
+  };
+
   const products = [
     {
       id: 1,
@@ -126,6 +136,14 @@ const BestsellerProducts = () => {
                     <span className="text-gray-400 line-through mr-2">${product.price}</span>
                     <span className="text-green-600">${product.salePrice}</span>
                   </div>
+                  <Button
+                    onClick={(e) => handleAddToCart(e, product)}
+                    variant="default"
+                    className="w-full bg-white text-gray-900 hover:bg-gray-100 flex items-center justify-center gap-2 mt-4"
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    Add to Cart
+                  </Button>
                 </CardContent>
               </Card>
             ))}

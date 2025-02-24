@@ -43,7 +43,7 @@ const HeroSlider = () => {
   const [emblaRef] = useEmblaCarousel({ loop: true }, [Autoplay()]);
 
   return (
-    <Carousel 
+    <Carousel
       ref={emblaRef}
       className="w-full"
       opts={{
@@ -54,7 +54,7 @@ const HeroSlider = () => {
       <CarouselContent>
         {slides.map((slide) => (
           <CarouselItem key={slide.id}>
-            <AspectRatio ratio={16/9} className="relative overflow-hidden">
+            <AspectRatio ratio={14 / 5} className="relative overflow-hidden">
               <img
                 src={slide.image}
                 alt={slide.title}
@@ -64,9 +64,9 @@ const HeroSlider = () => {
               <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center">
                 <h2 className="text-4xl md:text-6xl font-bold mb-4">{slide.title}</h2>
                 <p className="text-lg md:text-xl mb-8">{slide.description}</p>
-                <Button 
+                <Button
                   asChild
-                  variant="outline" 
+                  variant="outline"
                   size="lg"
                   className="bg-transparent text-white border-white hover:bg-white hover:text-black transition-colors"
                 >
