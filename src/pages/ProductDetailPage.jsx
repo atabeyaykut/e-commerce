@@ -1,45 +1,89 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { Star, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import BrandLogos from '../components/ui/BrandLogos';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { fetchProduct } from '../store/actions/productActions';
+import { clearSelectedProduct } from '../store/slices/productSlice';
+import { Button } from '../components/ui/button';
+import { addToCart } from '../store/slices/cartSlice';
 
-const ProductDetailPage = () => {
-  const { id } = useParams();
-  const [selectedColor, setSelectedColor] = useState(0);
+const ProductDetailPage = ({ match }) => {
+  const { productId } = match.params;
   const [selectedImage, setSelectedImage] = useState(0);
   const [direction, setDirection] = useState(0);
+  
+  const history = useHistory();
+  const dispatch = useDispatch();
+  const { selectedProduct, loading, error } = useSelector((state) => state.selectedProduct);
 
-  // Bu veriyi API'den alacağız, şimdilik statik
-  const product = {
-    name: 'Monitor stand',
-    price: '$11.99.99',
-    rating: 4,
-    reviews: 12,
-    availability: 'In Stock',
-    description: 'Met minim Mollie non desert Alamo est sit cliquey dolor do met sent. RELIT official consequent door ENIM minim non desert Alamo est sit cliquey dolor do met sent.',
-    colors: ['#23A6F0', '#2DC071', '#E77C40', '#252B42'],
-    images: [
-      'https://picsum.photos/800/600?random=1',
-      'https://picsum.photos/800/600?random=2',
-      'https://picsum.photos/800/600?random=3',
-      'https://picsum.photos/800/600?random=4'
-    ]
+  useEffect(() => {
+    if (productId) {
+      dispatch(fetchProduct(productId));
+    }
+    
+    return () => {
+      dispatch(clearSelectedProduct());
+    };
+  }, [dispatch, productId]);
+
+  const handleBack = () => {
+    history.goBack();
   };
 
   const handlePrevImage = () => {
+    if (!selectedProduct?.images?.length) return;
     setDirection(-1);
     setSelectedImage((prev) =>
-      prev === 0 ? product.images.length - 1 : prev - 1
+      prev === 0 ? selectedProduct.images.length - 1 : prev - 1
     );
   };
 
   const handleNextImage = () => {
+    if (!selectedProduct?.images?.length) return;
     setDirection(1);
     setSelectedImage((prev) =>
-      prev === product.images.length - 1 ? 0 : prev + 1
+      prev === selectedProduct.images.length - 1 ? 0 : prev + 1
     );
   };
+
+  useEffect(() => {
+    setSelectedImage(0);
+  }, [selectedProduct?.id]);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-80 z-50">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-8">
+        <Button onClick={handleBack} className="mb-4 flex items-center gap-2">
+          <ArrowLeft size={20} />
+          Back
+        </Button>
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
+  }
+
+  if (!selectedProduct) {
+    return (
+      <div className="container mx-auto p-8">
+        <Button onClick={handleBack} className="mb-4 flex items-center gap-2">
+          <ArrowLeft size={20} />
+          Back
+        </Button>
+        <div>Product not found</div>
+      </div>
+    );
+  }
 
   const slideVariants = {
     enter: (direction) => ({
@@ -59,82 +103,88 @@ const ProductDetailPage = () => {
   return (
     <div className="bg-white">
       <div className="container max-w-7xl mx-auto px-4 py-4">
-        {/* Breadcrumb */}
-        <nav className="flex justify-start mx-4 mb-8">
-          <ol className="flex items-center space-x-2 text-md">
-            <li>
-              <a href="/" className="text-gray-600 hover:text-gray-900 font-bold">
-                Home
-              </a>
-            </li>
-            <li>
-              <span className="text-gray-400 mx-2">›</span>
-            </li>
-            <li>
-              <span className="text-gray-400">Shop</span>
-            </li>
-          </ol>
-        </nav>
+        <Button onClick={handleBack} className="mb-8 flex items-center gap-2 hover:bg-gray-100">
+          <ArrowLeft size={20} />
+          Back to Shopping
+        </Button>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Left Column - Images */}
           <div className="space-y-4">
-            <div className="relative aspect-w-4 aspect-h-3 bg-gray-100 overflow-hidden">
-              <AnimatePresence initial={false} custom={direction} mode="wait">
-                <motion.img
-                  key={selectedImage}
-                  src={product.images[selectedImage]}
-                  alt={product.name}
-                  className="w-full h-full object-contain"
-                  variants={slideVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{
-                    x: { type: "spring", stiffness: 400, damping: 30 },
-                    opacity: { duration: 0.1 }
-                  }}
-                  custom={direction}
-                />
-              </AnimatePresence>
-              {/* Navigation Arrows */}
-              <button
-                onClick={handlePrevImage}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors"
-              >
-                <ChevronLeft className="w-6 cursor-pointer h-6 text-gray-800" />
-              </button>
-              <button
-                onClick={handleNextImage}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors"
-              >
-                <ChevronRight className="w-6 cursor-pointer h-6 text-gray-800" />
-              </button>
+            <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <AnimatePresence initial={false} custom={direction} mode="wait">
+                  {selectedProduct?.images?.length > 0 ? (
+                    <motion.img
+                      key={selectedImage}
+                      src={selectedProduct.images[selectedImage]?.url}
+                      alt={`${selectedProduct.name} - Image ${selectedImage + 1}`}
+                      className="w-full h-full object-contain"
+                      variants={slideVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      custom={direction}
+                      transition={{
+                        x: { type: "spring", stiffness: 300, damping: 30 },
+                        opacity: { duration: 0.2 }
+                      }}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center w-full h-full text-gray-400">
+                      No image available
+                    </div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Navigation Arrows - Only show if there are multiple images */}
+              {selectedProduct?.images?.length > 1 && (
+                <div className="absolute inset-0 flex items-center justify-between p-4">
+                  <button
+                    onClick={handlePrevImage}
+                    className="p-2 rounded-full bg-white/80 hover:bg-white shadow-lg"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={handleNextImage}
+                    className="p-2 rounded-full bg-white/80 hover:bg-white shadow-lg"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                </div>
+              )}
             </div>
-            <div className="flex space-x-4 overflow-x-auto pb-2">
-              {product.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setDirection(index > selectedImage ? 1 : -1);
-                    setSelectedImage(index);
-                  }}
-                  className={`flex-shrink-0 w-24 h-24 bg-gray-100 ${selectedImage === index ? 'ring-2 ring-blue-500' : ''
+
+            {/* Thumbnail Images - Only show if there are multiple images */}
+            {selectedProduct?.images?.length > 1 && (
+              <div className="flex space-x-4 overflow-x-auto pb-2">
+                {selectedProduct.images.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setDirection(index > selectedImage ? 1 : -1);
+                      setSelectedImage(index);
+                    }}
+                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
+                      selectedImage === index ? 'border-blue-500' : 'border-transparent'
                     }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${product.name} ${index + 1}`}
-                    className="w-full h-full object-contain"
-                  />
-                </button>
-              ))}
-            </div>
+                  >
+                    <img
+                      src={image.url}
+                      alt={`${selectedProduct.name} - Thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right Column - Product Info */}
           <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-900">{product.name}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{selectedProduct.name}</h1>
 
             {/* Rating */}
             <div className="flex items-center space-x-2">
@@ -143,62 +193,38 @@ const ProductDetailPage = () => {
                   <Star
                     key={index}
                     size={16}
-                    className={`${index < product.rating
+                    className={`${index < selectedProduct.rating
                       ? 'text-yellow-400 fill-current'
                       : 'text-gray-300'
                       }`}
                   />
                 ))}
               </div>
-              <span className="text-sm text-gray-500">{product.reviews} Reviews</span>
+              <span className="text-sm text-gray-500">{selectedProduct.reviews} Reviews</span>
             </div>
 
             {/* Price */}
-            <div className="text-2xl font-bold text-blue-600">{product.price}</div>
+            <div className="text-2xl font-bold text-blue-600">{selectedProduct.price}</div>
 
             {/* Availability */}
             <div className="text-sm text-gray-600">
-              Availability: <span className="text-blue-600">{product.availability}</span>
+              Availability: <span className="text-blue-600">{selectedProduct.availability}</span>
             </div>
 
             {/* Description */}
-            <p className="text-gray-600 border-b-2 border-gray-300 py-4 pb-8">{product.description}</p>
-
-            {/* Color Selection */}
-            <div className="flex pt-6 items-center space-x-2">
-              {product.colors.map((color, index) => (
-                <button
-                  key={index}
-                  className={`w-6 h-6 rounded-full focus:outline-none ${selectedColor === index ? 'ring-2 ring-offset-2 ring-gray-400' : ''
-                    }`}
-                  style={{ backgroundColor: color }}
-                  onClick={() => setSelectedColor(index)}
-                />
-              ))}
+            <div className="prose max-w-none">
+              <h3 className="text-lg font-semibold text-gray-900">Description</h3>
+              <p className="text-gray-600">{selectedProduct.description}</p>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex space-x-3 max-w-sm pt-2">
-              <button className="flex-1 bg-blue-600 text-white px-8 py-3 rounded hover:bg-blue-700">
-                Select Options
-              </button>
-              <button className="flex items-center justify-center w-12 h-12 rounded-full border border-gray-300 hover:border-gray-400">
-                <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </button>
-              <button className="flex items-center justify-center w-12 h-12 rounded-full border border-gray-300 hover:border-gray-400">
-                <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              </button>
-              <button className="flex items-center justify-center w-12 h-12 rounded-full border border-gray-300 hover:border-gray-400">
-                <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-              </button>
-            </div>
+            {/* Add to Cart Button */}
+            <Button 
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg"
+              disabled={selectedProduct.stock === 0}
+              onClick={() => dispatch(addToCart(selectedProduct))}
+            >
+              {selectedProduct.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+            </Button>
           </div>
         </div>
 

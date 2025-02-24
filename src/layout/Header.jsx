@@ -20,6 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import CartDropdown from '../components/CartDropdown';
 
 const Header = memo(() => {
   const { isAuthenticated, user, logout } = useAuthStore();
@@ -199,12 +200,7 @@ const Header = memo(() => {
                                   />
                                   <span className="ml-3 text-gray-700">{category.displayTitle}</span>
                                 </div>
-                                {category.rating && (
-                                  <div className="flex items-center text-sm text-gray-500">
-                                    <span className="mr-2">{category.rating}</span>
-                                    <span>★</span>
-                                  </div>
-                                )}
+                                
                               </div>
                             ))
                           )}
@@ -254,12 +250,7 @@ const Header = memo(() => {
                                   />
                                   <span className="ml-3 text-gray-700">{category.displayTitle}</span>
                                 </div>
-                                {category.rating && (
-                                  <div className="flex items-center text-sm text-gray-500">
-                                    <span className="mr-2">{category.rating}</span>
-                                    <span>★</span>
-                                  </div>
-                                )}
+                                
                               </div>
                             ))
                           )}
@@ -358,11 +349,23 @@ const Header = memo(() => {
                     <Heart className="h-6 w-6" />
                   </Link>
                 </Button>
-                <Button variant="ghost" size="icon" className="text-gray-600 hover:text-gray-800 hover:bg-transparent p-0" asChild>
-                  <Link to="/cart">
-                    <ShoppingCart className="h-6 w-6" />
-                  </Link>
-                </Button>
+                <div className="relative group">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-gray-600 hover:text-gray-800 hover:bg-transparent p-0 relative group-hover:text-orange-500"
+                    asChild
+                  >
+                    <Link to="/shoppingcart">
+                      <ShoppingCart className="h-6 w-6" />
+                      <span className="sr-only">Sepetim</span>
+                    </Link>
+                  </Button>
+                  <div className="absolute right-0 top-full invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 pt-2">
+                    <CartDropdown />
+                  </div>
+                </div>
+                
               </div>
 
               {/* Mobile Menu Button */}

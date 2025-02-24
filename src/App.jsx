@@ -70,11 +70,16 @@ function App() {
                   <ShopPage match={match} />
                 </Suspense>
               )} />
-              <Route exact path="/product/:id" component={() => (
-                <Suspense fallback={<LoadingSpinner />}>
-                  <ProductDetailPage />
-                </Suspense>
-              )} />
+              {/* Product Detail Route - Ensure all parameters are required */}
+              <Route 
+                exact 
+                path="/shop/:gender/:categoryName/:categoryId/:productNameSlug/:productId" 
+                render={({ match }) => (
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <ProductDetailPage match={match} />
+                  </Suspense>
+                )} 
+              />
               <Route path="/about" component={() => (
                 <Suspense fallback={<LoadingSpinner />}>
                   <AboutPage />

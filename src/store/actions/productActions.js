@@ -8,6 +8,12 @@ import {
   SET_FILTER,
   FETCH_STATES
 } from '../reducers/productReducer';
+import { 
+  fetchProductStart, 
+  fetchProductSuccess, 
+  fetchProductFailure 
+} from '../slices/productSlice';
+import api from '../../utils/axios';
 
 // Action Creators
 export const setCategories = (categories) => ({
@@ -44,3 +50,14 @@ export const setFilter = (filter) => ({
   type: SET_FILTER,
   payload: filter
 });
+
+// Thunk action to fetch a single product
+export const fetchProduct = (productId) => async (dispatch) => {
+  try {
+    dispatch(fetchProductStart());
+    const response = await api.get(`/products/${productId}`);
+    dispatch(fetchProductSuccess(response.data));
+  } catch (error) {
+    dispatch(fetchProductFailure(error.message));
+  }
+};

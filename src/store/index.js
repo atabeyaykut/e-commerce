@@ -6,6 +6,7 @@ import clientReducer from './reducers/clientReducer';
 import productReducer from './reducers/productReducer';
 import cartReducer from './reducers/cartReducer';
 import productsReducer from './productsSlice';
+import selectedProductReducer from './slices/productSlice';
 
 const middleware = [];
 
@@ -20,9 +21,12 @@ export const store = configureStore({
     client: clientReducer,
     product: productReducer,
     cart: cartReducer,
-    products: productsReducer
+    products: productsReducer,
+    selectedProduct: selectedProductReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(middleware),
   devTools: process.env.NODE_ENV !== 'production'
 });
+
+export default store;
