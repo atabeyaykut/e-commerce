@@ -26,7 +26,7 @@ const ProductCard = ({ product }) => {
     const categorySlug = createSlug(categoryName);
     const gender = product.gender || 'unisex';
     const categoryId = product.category_id || 0;
-    
+
     return `/shop/${gender}/${categorySlug}/${categoryId}/${nameSlug}/${product.id}`;
   };
 
@@ -57,7 +57,7 @@ const ProductCard = ({ product }) => {
             <Button
               onClick={handleAddToCart}
               variant="default"
-              className="w-full bg-white text-gray-900 hover:bg-gray-100 flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full text-gray-900 hover:bg-gray-100 flex items-center justify-center gap-2 cursor-pointer"
             >
               <ShoppingCart className="h-4 w-4" />
               Sepete Ekle
@@ -67,7 +67,7 @@ const ProductCard = ({ product }) => {
       </CardHeader>
 
       <CardContent className="p-4">
-        <Link 
+        <Link
           to={getProductUrl()}
           className="block group-hover:text-blue-600 transition-colors duration-300 cursor-pointer"
         >
@@ -75,7 +75,7 @@ const ProductCard = ({ product }) => {
             {product.name || 'Untitled Product'}
           </h3>
         </Link>
-        
+
         <div className="mt-2 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-lg font-bold text-blue-600">
@@ -87,7 +87,7 @@ const ProductCard = ({ product }) => {
               </span>
             )}
           </div>
-          
+
           <div className="flex flex-col items-end text-sm text-gray-500">
             <div className="flex items-center gap-1">
               <span className="text-yellow-400">★</span>

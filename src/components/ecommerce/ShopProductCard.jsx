@@ -25,7 +25,7 @@ const ShopProductCard = ({ product, onAddToCart }) => {
             <Button
               onClick={(e) => onAddToCart(e, product)}
               variant="default"
-              className="w-full bg-white text-gray-900 hover:bg-gray-100 flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full text-gray-900 hover:bg-gray-100 flex items-center justify-center gap-2 cursor-pointer"
             >
               <ShoppingCart className="h-4 w-4" />
               Sepete Ekle
