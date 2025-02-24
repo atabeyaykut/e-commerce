@@ -4,7 +4,7 @@ import logger from 'redux-logger';
 import authReducer from './reducers/authReducer';
 import clientReducer from './reducers/clientReducer';
 import productReducer from './reducers/productReducer';
-import cartReducer from './reducers/cartReducer';
+import cartReducer from './slices/cartSlice';
 import productsReducer from './productsSlice';
 import selectedProductReducer from './slices/productSlice';
 

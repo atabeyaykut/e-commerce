@@ -14,7 +14,9 @@ const ProductDetailPage = ({ match }) => {
   const { productId } = match.params;
   const [selectedImage, setSelectedImage] = useState(0);
   const [direction, setDirection] = useState(0);
-  
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+
   const history = useHistory();
   const dispatch = useDispatch();
   const { selectedProduct, loading, error } = useSelector((state) => state.selectedProduct);
@@ -52,6 +54,20 @@ const ProductDetailPage = ({ match }) => {
   useEffect(() => {
     setSelectedImage(0);
   }, [selectedProduct?.id]);
+
+  const handleAddToCart = () => {
+    if (!selectedSize && selectedProduct.sizes?.length > 0) {
+      alert("Lütfen bir beden seçin");
+      return;
+    }
+
+    const productToAdd = {
+      ...selectedProduct,
+      size: selectedSize
+    };
+
+    dispatch(addToCart(productToAdd));
+  };
 
   if (loading) {
     return (
@@ -217,11 +233,54 @@ const ProductDetailPage = ({ match }) => {
               <p className="text-gray-600">{selectedProduct.description}</p>
             </div>
 
+            {/* Size Selection */}
+            {selectedProduct.sizes?.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-900 mb-2">Beden</h3>
+                <div className="grid grid-cols-4 gap-2">
+                  {selectedProduct.sizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`py-2 text-sm font-medium rounded-md border ${
+                        selectedSize === size
+                          ? 'border-gray-900 bg-gray-900 text-white'
+                          : 'border-gray-200 hover:border-gray-900'
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity Selection */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-900 mb-2">Adet</h3>
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="p-2 border rounded-md hover:border-gray-900"
+                  disabled={quantity <= 1}
+                >
+                  -
+                </button>
+                <span className="text-lg font-medium">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="p-2 border rounded-md hover:border-gray-900"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
             {/* Add to Cart Button */}
             <Button 
               className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg"
               disabled={selectedProduct.stock === 0}
-              onClick={() => dispatch(addToCart(selectedProduct))}
+              onClick={handleAddToCart}
             >
               {selectedProduct.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
             </Button>

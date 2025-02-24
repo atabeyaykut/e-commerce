@@ -19,6 +19,7 @@ const TeamPage = lazy(() => import('./pages/TeamPage'));
 const ShopPage = lazy(() => import('./pages/ShopPage'));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
 const MyAccountPage = lazy(() => import('./pages/MyAccountPage'));
+const ShoppingCartPage = lazy(() => import('./pages/ShoppingCartPage'));
 
 function App() {
   const { verifyToken } = useAuthStore();
@@ -71,14 +72,10 @@ function App() {
                 </Suspense>
               )} />
               {/* Product Detail Route - Ensure all parameters are required */}
-              <Route 
-                exact 
-                path="/shop/:gender/:categoryName/:categoryId/:productNameSlug/:productId" 
-                render={({ match }) => (
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <ProductDetailPage match={match} />
-                  </Suspense>
-                )} 
+              <Route
+                exact
+                path="/shop/:gender/:categoryName/:categoryId/:productNameSlug/:productId"
+                component={ProductDetailPage}
               />
               <Route path="/about" component={() => (
                 <Suspense fallback={<LoadingSpinner />}>
@@ -100,6 +97,7 @@ function App() {
                   <MyAccountPage />
                 </Suspense>
               )} />
+              <Route path="/shoppingcart" render={() => <ShoppingCartPage />} />
               <Route path="*" render={() => (
                 <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
                   <h1 className="text-4xl font-bold text-gray-800 mb-4">404</h1>

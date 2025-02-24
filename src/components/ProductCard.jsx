@@ -3,8 +3,14 @@ import { Link } from 'react-router-dom';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { createSlug } from '../utils/stringUtils';
+import { useDispatch } from 'react-redux';
+import { ShoppingCart } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { addToCart } from '../store/slices/cartSlice';
 
 const ProductCard = ({ product }) => {
+  const dispatch = useDispatch();
+
   // Örnek renk seçenekleri (API'den gelmiyorsa)
   const defaultColors = ['#000000', '#3B82F6', '#EF4444', '#10B981'];
   const colors = product.colors || defaultColors;
@@ -24,11 +30,16 @@ const ProductCard = ({ product }) => {
     return `/shop/${gender}/${categorySlug}/${categoryId}/${nameSlug}/${product.id}`;
   };
 
+  const handleAddToCart = (e) => {
+    e.preventDefault(); // Prevent navigation
+    dispatch(addToCart(product));
+  };
+
   return (
     <Card className="group relative gap-2 pb-6 border shadow-sm rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer">
       <CardHeader className="p-0">
         <div className="relative overflow-hidden">
-          <Link to={getProductUrl()} className="block">
+          <Link to={getProductUrl()} className="block cursor-pointer">
             <AspectRatio ratio={3 / 4} className="overflow-hidden bg-gray-100">
               <img
                 src={product.images?.[0]?.url || "https://picsum.photos/300/400"}
@@ -42,13 +53,23 @@ const ProductCard = ({ product }) => {
               )}
             </AspectRatio>
           </Link>
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Button
+              onClick={handleAddToCart}
+              variant="default"
+              className="w-full bg-white text-gray-900 hover:bg-gray-100 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              Sepete Ekle
+            </Button>
+          </div>
         </div>
       </CardHeader>
 
       <CardContent className="p-4">
         <Link 
           to={getProductUrl()}
-          className="block group-hover:text-blue-600 transition-colors duration-300"
+          className="block group-hover:text-blue-600 transition-colors duration-300 cursor-pointer"
         >
           <h3 className="text-lg font-medium text-gray-900 group-hover:text-blue-600 line-clamp-2">
             {product.name || 'Untitled Product'}
