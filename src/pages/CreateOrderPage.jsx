@@ -24,6 +24,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/useToast';
 import api from '@/services/api';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import CreditCardManager from '@/components/ui/credit-card';
 
 const CreateOrderPage = () => {
   const [addresses, setAddresses] = useState([]);
@@ -33,6 +34,8 @@ const CreateOrderPage = () => {
   const [editingAddress, setEditingAddress] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cards, setCards] = useState([]);
+  const [selectedCard, setSelectedCard] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     name: '',
@@ -48,12 +51,12 @@ const CreateOrderPage = () => {
     'İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya', 
     'Adana', 'Konya', 'Gaziantep', 'Mersin', 'Diyarbakır'
   ]);
-
-  const history = useHistory();
   const { toast } = useToast();
+  const history = useHistory();
 
   useEffect(() => {
     fetchAddresses();
+    fetchCards();
   }, []);
 
   const fetchAddresses = async () => {
@@ -221,19 +224,61 @@ const CreateOrderPage = () => {
     });
   };
 
-  if (isLoading && !addresses.length) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <LoadingSpinner />
-      </div>
-    );
+  // Credit Card Management
+  const fetchCards = async () => {
+    try {
+      setIsLoading(true);
+      const response = await api.get('/user/card');
+      setCards(response.data);
+    } catch (error) {
+      toast({
+        title: 'Hata',
+        description: 'Kayıtlı kartlar yüklenirken bir hata oluştu',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddCard = async (cardData) => {
+    try {
+      setIsSubmitting(true);
+      const response = await api.post('/user/card', cardData);
+      toast({
+        title: 'Başarılı',
+        description: 'Kart başarıyla eklendi',
+        variant: 'success',
+      });
+      await fetchCards();
+      setSelectedCard(response.data);
+    } catch (error) {
+      toast({
+        title: 'Hata',
+        description: 'Kart eklenirken bir hata oluştu',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSelectCard = (card) => {
+    setSelectedCard(card);
+  };
+
+  if (isLoading) {
+    return <LoadingSpinner />;
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="space-y-8">
+    <div className="container mx-auto py-8 space-y-8">
+      <h1 className="text-3xl font-bold">Sipariş Oluştur</h1>
+      
+      {/* Address Management Section */}
+      <section className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Sipariş Oluştur - Adres Bilgileri</h1>
+          <h2 className="text-xl font-semibold">Adres Bilgileri</h2>
           <Dialog open={isAddingAddress} onOpenChange={setIsAddingAddress}>
             <DialogTrigger asChild>
               <Button onClick={() => {
@@ -509,17 +554,62 @@ const CreateOrderPage = () => {
           </div>
         </div>
 
-        <div className="flex justify-end mt-8">
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Ödeme Seçenekleri</h2>
+          <div className="grid gap-4">
+            <div className="rounded-lg border p-4">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <span className="font-medium">Banka/Kredi Kartı</span>
+                  <span className="text-sm text-muted-foreground">veya</span>
+                  <span className="font-medium">Alışveriş Kredisi</span>
+                </div>
+                <span className="text-sm text-muted-foreground">ile ödemenizi güvenle yapabilirsiniz.</span>
+              </div>
+
+              <CreditCardManager
+                cards={cards}
+                onAddCard={handleAddCard}
+                onSelectCard={handleSelectCard}
+                selectedCardId={selectedCard?.id}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="rounded-lg border p-4">
+            <h2 className="text-xl font-semibold mb-4">Sipariş Özeti</h2>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span>Ürünün Toplamı</span>
+                <span className="font-medium">6.604,22 TL</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Kargo Toplamı</span>
+                <span className="font-medium">29,99 TL</span>
+              </div>
+              <div className="flex justify-between text-success">
+                <span>150 TL ve Üzeri Kargo Bedava (Satıcı Karşılar)</span>
+                <span>-29,99 TL</span>
+              </div>
+              <div className="flex justify-between font-bold text-lg pt-2 border-t">
+                <span>Toplam</span>
+                <span>6.604,22 TL</span>
+              </div>
+            </div>
+          </div>
+
           <Button
+            className="w-full"
             size="lg"
+            disabled={!selectedCard || !selectedShippingAddress || isSubmitting}
             onClick={handleContinue}
-            disabled={!selectedShippingAddress || !selectedBillingAddress || isLoading}
           >
-            {isLoading ? <LoadingSpinner className="w-4 h-4 mr-2" /> : null}
-            Devam Et
+            {isSubmitting ? <LoadingSpinner /> : 'Ödeme Yap'}
           </Button>
         </div>
-      </div>
+      </section>
     </div>
   );
 };
