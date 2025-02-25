@@ -25,6 +25,7 @@ import { useToast } from '@/hooks/useToast';
 import api from '@/services/api';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import CreditCardManager from '@/components/ui/credit-card';
+import { useSelector } from 'react-redux';
 
 const CreateOrderPage = () => {
   const [addresses, setAddresses] = useState([]);
@@ -53,6 +54,7 @@ const CreateOrderPage = () => {
   ]);
   const { toast } = useToast();
   const history = useHistory();
+  const cart = useSelector((state) => state.cart);
 
   useEffect(() => {
     fetchAddresses();
@@ -270,6 +272,13 @@ const CreateOrderPage = () => {
   if (isLoading) {
     return <LoadingSpinner />;
   }
+
+  const subtotal = cart.total;
+  const shippingCost = 29.99;
+  const freeShippingThreshold = 150;
+  const isFreeShipping = subtotal >= freeShippingThreshold;
+  const finalShippingCost = isFreeShipping ? 0 : shippingCost;
+  const total = subtotal + finalShippingCost;
 
   return (
     <div className="container mx-auto py-8 space-y-8">
@@ -583,19 +592,21 @@ const CreateOrderPage = () => {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>Ürünün Toplamı</span>
-                <span className="font-medium">6.604,22 TL</span>
+                <span className="font-medium">{subtotal.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}</span>
               </div>
               <div className="flex justify-between">
                 <span>Kargo Toplamı</span>
-                <span className="font-medium">29,99 TL</span>
+                <span className="font-medium">{shippingCost.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}</span>
               </div>
-              <div className="flex justify-between text-success">
-                <span>150 TL ve Üzeri Kargo Bedava (Satıcı Karşılar)</span>
-                <span>-29,99 TL</span>
-              </div>
+              {isFreeShipping && (
+                <div className="flex justify-between text-success">
+                  <span>{freeShippingThreshold} TL ve Üzeri Kargo Bedava (Satıcı Karşılar)</span>
+                  <span>-{shippingCost.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}</span>
+                </div>
+              )}
               <div className="flex justify-between font-bold text-lg pt-2 border-t">
                 <span>Toplam</span>
-                <span>6.604,22 TL</span>
+                <span>{total.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}</span>
               </div>
             </div>
           </div>
