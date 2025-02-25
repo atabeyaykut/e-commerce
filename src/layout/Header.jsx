@@ -371,7 +371,7 @@ const Header = memo(() => {
                     className="text-gray-600 hover:text-gray-800 hover:bg-transparent p-0 relative group-hover:text-orange-500 cursor-pointer"
                     asChild
                   >
-                    <Link to="/shoppingcart">
+                    <Link to="/cart">
                       <ShoppingCart className="h-6 w-6" />
                       <span className="sr-only">Sepetim</span>
                     </Link>

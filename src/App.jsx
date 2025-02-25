@@ -8,6 +8,7 @@ import useAuthStore from './store/authStore';
 import Header from './layout/Header';
 import Footer from './layout/Footer';
 import LoadingSpinner from './components/ui/LoadingSpinner';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Lazy load pages
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -19,10 +20,11 @@ const TeamPage = lazy(() => import('./pages/TeamPage'));
 const ShopPage = lazy(() => import('./pages/ShopPage'));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
 const MyAccountPage = lazy(() => import('./pages/MyAccountPage'));
-const ShoppingCartPage = lazy(() => import('./pages/ShoppingCartPage'));
+const CartPage = lazy(() => import('./pages/CartPage'));
+const CreateOrderPage = lazy(() => import('./pages/CreateOrderPage'));
 
-function App() {
-  const { verifyToken } = useAuthStore();
+const App = () => {
+  const verifyToken = useAuthStore(state => state.verifyToken);
 
   useEffect(() => {
     verifyToken();
@@ -36,26 +38,41 @@ function App() {
         <main className="flex-grow">
           <AnimatePresence mode="wait">
             <Switch>
-              <Route exact path="/" component={() => (
+              <Route exact path="/">
                 <Suspense fallback={<LoadingSpinner />}>
                   <HomePage />
                 </Suspense>
-              )} />
-              <Route exact path="/login" component={() => (
+              </Route>
+              <Route exact path="/login">
                 <Suspense fallback={<LoadingSpinner />}>
                   <LoginPage />
                 </Suspense>
-              )} />
-              <Route exact path="/signup" component={() => (
+              </Route>
+              <Route exact path="/signup">
                 <Suspense fallback={<LoadingSpinner />}>
                   <SignupPage />
                 </Suspense>
-              )} />
-              <Route exact path="/shop" component={() => (
+              </Route>
+              <Route exact path="/about">
+                <Suspense fallback={<LoadingSpinner />}>
+                  <AboutPage />
+                </Suspense>
+              </Route>
+              <Route exact path="/contact">
+                <Suspense fallback={<LoadingSpinner />}>
+                  <ContactPage />
+                </Suspense>
+              </Route>
+              <Route exact path="/team">
+                <Suspense fallback={<LoadingSpinner />}>
+                  <TeamPage />
+                </Suspense>
+              </Route>
+              <Route exact path="/shop">
                 <Suspense fallback={<LoadingSpinner />}>
                   <ShopPage />
                 </Suspense>
-              )} />
+              </Route>
               <Route exact path="/shop/:gender" render={({ match }) => (
                 <Suspense fallback={<LoadingSpinner />}>
                   <ShopPage match={match} />
@@ -65,45 +82,43 @@ function App() {
                 "/shop/kadin/:categoryName/:categoryId",
                 "/shop/erkek/:categoryName/:categoryId",
                 "/shop/men/:categoryName/:categoryId",
-                "/shop/women/:categoryName/:categoryId"
+                "/shop/women/:categoryName/:categoryId",
+                "/shop/unisex/:categoryName/:categoryId"
               ]} render={({ match }) => (
                 <Suspense fallback={<LoadingSpinner />}>
                   <ShopPage match={match} />
                 </Suspense>
               )} />
-              {/* Product Detail Route - Ensure all parameters are required */}
               <Route
                 exact
                 path="/shop/:gender/:categoryName/:categoryId/:productNameSlug/:productId"
-                component={ProductDetailPage}
+                render={({ match }) => (
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <ProductDetailPage match={match} />
+                  </Suspense>
+                )}
               />
-              <Route path="/about" component={() => (
-                <Suspense fallback={<LoadingSpinner />}>
-                  <AboutPage />
-                </Suspense>
-              )} />
-              <Route path="/team" component={() => (
-                <Suspense fallback={<LoadingSpinner />}>
-                  <TeamPage />
-                </Suspense>
-              )} />
-              <Route path="/contact" component={() => (
-                <Suspense fallback={<LoadingSpinner />}>
-                  <ContactPage />
-                </Suspense>
-              )} />
-              <Route path="/my-account" component={() => (
+              <ProtectedRoute exact path="/my-account">
                 <Suspense fallback={<LoadingSpinner />}>
                   <MyAccountPage />
                 </Suspense>
-              )} />
-              <Route path="/shoppingcart" render={() => <ShoppingCartPage />} />
-              <Route path="*" render={() => (
+              </ProtectedRoute>
+              <ProtectedRoute exact path="/cart">
+                <Suspense fallback={<LoadingSpinner />}>
+                  <CartPage />
+                </Suspense>
+              </ProtectedRoute>
+              <ProtectedRoute exact path="/order/create">
+                <Suspense fallback={<LoadingSpinner />}>
+                  <CreateOrderPage />
+                </Suspense>
+              </ProtectedRoute>
+              <Route path="*">
                 <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
                   <h1 className="text-4xl font-bold text-gray-800 mb-4">404</h1>
                   <p className="text-xl text-gray-600">Page not found</p>
                 </div>
-              )} />
+              </Route>
             </Switch>
           </AnimatePresence>
         </main>
@@ -111,6 +126,6 @@ function App() {
       </div>
     </Router>
   );
-}
+};
 
 export default App;

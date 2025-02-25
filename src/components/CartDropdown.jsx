@@ -37,7 +37,7 @@ const CartDropdown = () => {
   };
 
   const handleViewCart = () => {
-    history.push('/shoppingcart');
+    history.push('/cart');
   };
 
   const handleCreateOrder = () => {
