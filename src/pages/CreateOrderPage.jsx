@@ -1,28 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
-import { Button } from '../components/ui/button';
-import { Card } from '../components/ui/card';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../components/ui/select';
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../components/ui/dialog';
-import { Textarea } from '../components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
-import { useToast } from '../hooks/useToast';
-import api from '../services/api';
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useToast } from '@/hooks/useToast';
+import api from '@/services/api';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 const CreateOrderPage = () => {
   const [addresses, setAddresses] = useState([]);
@@ -30,6 +31,8 @@ const CreateOrderPage = () => {
   const [selectedBillingAddress, setSelectedBillingAddress] = useState(null);
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     name: '',
@@ -38,7 +41,8 @@ const CreateOrderPage = () => {
     city: '',
     district: '',
     neighborhood: '',
-    address: ''
+    address: '',
+    type: 'both' // 'shipping', 'billing', or 'both'
   });
   const [cities] = useState([
     'İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya', 
@@ -54,6 +58,7 @@ const CreateOrderPage = () => {
 
   const fetchAddresses = async () => {
     try {
+      setIsLoading(true);
       const response = await api.get('/user/address');
       setAddresses(response.data);
     } catch (error) {
@@ -62,7 +67,36 @@ const CreateOrderPage = () => {
         description: "Adresler yüklenirken bir hata oluştu.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const validateForm = () => {
+    const requiredFields = ['title', 'name', 'surname', 'phone', 'city', 'district', 'neighborhood', 'address'];
+    const missingFields = requiredFields.filter(field => !formData[field]);
+    
+    if (missingFields.length > 0) {
+      toast({
+        title: "Uyarı",
+        description: "Lütfen tüm zorunlu alanları doldurun.",
+        variant: "warning",
+      });
+      return false;
+    }
+
+    // Basic phone number validation
+    const phoneRegex = /^[0-9]{10,11}$/;
+    if (!phoneRegex.test(formData.phone.replace(/[^0-9]/g, ''))) {
+      toast({
+        title: "Uyarı",
+        description: "Lütfen geçerli bir telefon numarası girin.",
+        variant: "warning",
+      });
+      return false;
+    }
+
+    return true;
   };
 
   const handleInputChange = (e) => {
@@ -75,7 +109,10 @@ const CreateOrderPage = () => {
 
   const handleAddressSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     try {
+      setIsSubmitting(true);
       if (editingAddress) {
         await api.put('/user/address', {
           id: editingAddress.id,
@@ -96,7 +133,8 @@ const CreateOrderPage = () => {
         city: '',
         district: '',
         neighborhood: '',
-        address: ''
+        address: '',
+        type: 'both'
       });
       
       toast({
@@ -109,6 +147,8 @@ const CreateOrderPage = () => {
         description: "Adres kaydedilirken bir hata oluştu.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -122,15 +162,26 @@ const CreateOrderPage = () => {
       city: address.city,
       district: address.district,
       neighborhood: address.neighborhood,
-      address: address.address
+      address: address.address,
+      type: address.type || 'both'
     });
     setIsAddingAddress(true);
   };
 
   const handleDeleteAddress = async (addressId) => {
     try {
+      setIsLoading(true);
       await api.delete(`/user/address/${addressId}`);
       await fetchAddresses();
+      
+      // Clear selection if deleted address was selected
+      if (selectedShippingAddress?.id === addressId) {
+        setSelectedShippingAddress(null);
+      }
+      if (selectedBillingAddress?.id === addressId) {
+        setSelectedBillingAddress(null);
+      }
+      
       toast({
         title: "Başarılı",
         description: "Adres silindi.",
@@ -141,6 +192,8 @@ const CreateOrderPage = () => {
         description: "Adres silinirken bir hata oluştu.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -168,6 +221,14 @@ const CreateOrderPage = () => {
     });
   };
 
+  if (isLoading && !addresses.length) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="space-y-8">
@@ -185,7 +246,8 @@ const CreateOrderPage = () => {
                   city: '',
                   district: '',
                   neighborhood: '',
-                  address: ''
+                  address: '',
+                  type: 'both'
                 });
               }}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -240,7 +302,26 @@ const CreateOrderPage = () => {
                     value={formData.phone}
                     onChange={handleInputChange}
                     required
+                    pattern="[0-9]{10,11}"
+                    title="Lütfen geçerli bir telefon numarası girin"
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="type">Adres Tipi</Label>
+                  <Select
+                    name="type"
+                    value={formData.type}
+                    onValueChange={(value) => handleInputChange({ target: { name: 'type', value } })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Adres tipi seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="shipping">Sadece Teslimat</SelectItem>
+                      <SelectItem value="billing">Sadece Fatura</SelectItem>
+                      <SelectItem value="both">Teslimat ve Fatura</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="city">İl</Label>
@@ -291,7 +372,10 @@ const CreateOrderPage = () => {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <LoadingSpinner className="w-4 h-4 mr-2" />
+                  ) : null}
                   {editingAddress ? 'Adresi Güncelle' : 'Adresi Kaydet'}
                 </Button>
               </form>
@@ -311,51 +395,53 @@ const CreateOrderPage = () => {
               }}
             >
               <div className="space-y-4">
-                {addresses.map((address) => (
-                  <Card key={address.id} className="p-4">
-                    <div className="flex items-start">
-                      <RadioGroupItem
-                        value={address.id.toString()}
-                        id={`shipping-${address.id}`}
-                        className="mt-1"
-                      />
-                      <div className="ml-3 flex-1">
-                        <div className="flex items-center justify-between">
-                          <label
-                            htmlFor={`shipping-${address.id}`}
-                            className="font-medium cursor-pointer"
-                          >
-                            {address.title}
-                          </label>
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleEditAddress(address)}
+                {addresses
+                  .filter(address => ['shipping', 'both'].includes(address.type || 'both'))
+                  .map((address) => (
+                    <Card key={address.id} className="p-4">
+                      <div className="flex items-start">
+                        <RadioGroupItem
+                          value={address.id.toString()}
+                          id={`shipping-${address.id}`}
+                          className="mt-1"
+                        />
+                        <div className="ml-3 flex-1">
+                          <div className="flex items-center justify-between">
+                            <label
+                              htmlFor={`shipping-${address.id}`}
+                              className="font-medium cursor-pointer"
                             >
-                              <Pencil className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDeleteAddress(address.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                              {address.title}
+                            </label>
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditAddress(address)}
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteAddress(address.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {address.name} {address.surname}
+                          </p>
+                          <p className="text-sm text-gray-600">{address.phone}</p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {address.neighborhood}, {address.district}, {address.city}
+                          </p>
+                          <p className="text-sm text-gray-600">{address.address}</p>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {address.name} {address.surname}
-                        </p>
-                        <p className="text-sm text-gray-600">{address.phone}</p>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {address.neighborhood}, {address.district}, {address.city}
-                        </p>
-                        <p className="text-sm text-gray-600">{address.address}</p>
                       </div>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  ))}
               </div>
             </RadioGroup>
           </div>
@@ -371,51 +457,53 @@ const CreateOrderPage = () => {
               }}
             >
               <div className="space-y-4">
-                {addresses.map((address) => (
-                  <Card key={address.id} className="p-4">
-                    <div className="flex items-start">
-                      <RadioGroupItem
-                        value={address.id.toString()}
-                        id={`billing-${address.id}`}
-                        className="mt-1"
-                      />
-                      <div className="ml-3 flex-1">
-                        <div className="flex items-center justify-between">
-                          <label
-                            htmlFor={`billing-${address.id}`}
-                            className="font-medium cursor-pointer"
-                          >
-                            {address.title}
-                          </label>
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleEditAddress(address)}
+                {addresses
+                  .filter(address => ['billing', 'both'].includes(address.type || 'both'))
+                  .map((address) => (
+                    <Card key={address.id} className="p-4">
+                      <div className="flex items-start">
+                        <RadioGroupItem
+                          value={address.id.toString()}
+                          id={`billing-${address.id}`}
+                          className="mt-1"
+                        />
+                        <div className="ml-3 flex-1">
+                          <div className="flex items-center justify-between">
+                            <label
+                              htmlFor={`billing-${address.id}`}
+                              className="font-medium cursor-pointer"
                             >
-                              <Pencil className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDeleteAddress(address.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                              {address.title}
+                            </label>
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditAddress(address)}
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteAddress(address.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {address.name} {address.surname}
+                          </p>
+                          <p className="text-sm text-gray-600">{address.phone}</p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {address.neighborhood}, {address.district}, {address.city}
+                          </p>
+                          <p className="text-sm text-gray-600">{address.address}</p>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {address.name} {address.surname}
-                        </p>
-                        <p className="text-sm text-gray-600">{address.phone}</p>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {address.neighborhood}, {address.district}, {address.city}
-                        </p>
-                        <p className="text-sm text-gray-600">{address.address}</p>
                       </div>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  ))}
               </div>
             </RadioGroup>
           </div>
@@ -425,8 +513,9 @@ const CreateOrderPage = () => {
           <Button
             size="lg"
             onClick={handleContinue}
-            disabled={!selectedShippingAddress || !selectedBillingAddress}
+            disabled={!selectedShippingAddress || !selectedBillingAddress || isLoading}
           >
+            {isLoading ? <LoadingSpinner className="w-4 h-4 mr-2" /> : null}
             Devam Et
           </Button>
         </div>

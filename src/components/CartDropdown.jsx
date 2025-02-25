@@ -41,8 +41,7 @@ const CartDropdown = () => {
   };
 
   const handleCreateOrder = () => {
-    // To be implemented in the next phase
-    console.log('Creating order...');
+    history.push('/order');
   };
 
   // Calculate totals
