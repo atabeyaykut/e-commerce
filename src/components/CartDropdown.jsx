@@ -1,9 +1,10 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { Trash2 } from 'lucide-react';
-import { Button } from './ui/button';
-import { removeFromCart } from '../store/slices/cartSlice';
+import { Trash2, Plus, Minus, Check } from 'lucide-react';
+import { Button } from "./ui/button";
+import { Checkbox } from "./ui/checkbox";
+import { removeFromCart, updateItemCount, toggleItemCheck } from '../store/slices/cartSlice';
 import { API_URL } from '../config/api';
 
 const CartDropdown = () => {
@@ -11,18 +12,52 @@ const CartDropdown = () => {
   const history = useHistory();
   const { items, total } = useSelector((state) => state.cart);
 
+  // Constants for calculation
+  const SHIPPING_COST = 29.99;
+  const DISCOUNT_PERCENTAGE = 10;
+
   const handleRemoveItem = (e, productId) => {
     e.preventDefault();
     e.stopPropagation();
     dispatch(removeFromCart(productId));
   };
 
+  const handleUpdateCount = (e, productId, newCount) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (newCount >= 1) {
+      dispatch(updateItemCount({ productId, count: newCount }));
+    }
+  };
+
+  const handleToggleCheck = (e, productId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dispatch(toggleItemCheck(productId));
+  };
+
   const handleViewCart = () => {
     history.push('/shoppingcart');
   };
 
+  const handleCreateOrder = () => {
+    // To be implemented in the next phase
+    console.log('Creating order...');
+  };
+
+  // Calculate totals
+  const subtotal = items.reduce((sum, item) => {
+    if (item.checked) {
+      return sum + (item.product.price * item.count);
+    }
+    return sum;
+  }, 0);
+
+  const discount = (subtotal * DISCOUNT_PERCENTAGE) / 100;
+  const grandTotal = subtotal + SHIPPING_COST - discount;
+
   return (
-    <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+    <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
       <div className="p-4">
         <h3 className="text-lg font-medium mb-4">Sepetim ({items.length} ürün)</h3>
         
@@ -32,7 +67,14 @@ const CartDropdown = () => {
           <>
             <div className="space-y-4 max-h-96 overflow-auto">
               {items.map((item) => (
-                <div key={item.product.id} className="flex gap-4 py-2">
+                <div key={item.product.id} className="flex gap-4 py-2 border-b border-gray-100">
+                  <div className="flex items-center">
+                    <Checkbox
+                      checked={item.checked}
+                      onCheckedChange={(checked) => handleToggleCheck({ preventDefault: () => {}, stopPropagation: () => {} }, item.product.id)}
+                      aria-label="Select item"
+                    />
+                  </div>
                   <div className="w-20 h-20 flex-shrink-0">
                     <img
                       src={item.product.images?.[0]?.url || `${API_URL}/assets/default-product.jpg`}
@@ -48,32 +90,76 @@ const CartDropdown = () => {
                       {item.product.name}
                     </h4>
                     <p className="text-sm text-gray-500">
-                      {item.count} x {item.product.price.toFixed(2)} TL
+                      {item.product.price.toFixed(2)} TL
                     </p>
-                    <button
-                      onClick={(e) => handleRemoveItem(e, item.product.id)}
-                      className="text-red-500 hover:text-red-700 text-sm flex items-center gap-1 mt-1 cursor-pointer"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Kaldır
-                    </button>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={(e) => handleUpdateCount(e, item.product.id, item.count - 1)}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <span className="text-sm">{item.count}</span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={(e) => handleUpdateCount(e, item.product.id, item.count + 1)}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 ml-auto text-red-500 hover:text-red-600"
+                        onClick={(e) => handleRemoveItem(e, item.product.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="border-t mt-4 pt-4">
-              <div className="flex justify-between mb-4">
-                <span className="font-medium">Toplam:</span>
-                <span className="font-medium">{total.toFixed(2)} TL</span>
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Ürünler Toplamı:</span>
+                  <span className="font-medium">{subtotal.toFixed(2)} TL</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Kargo:</span>
+                  <span className="font-medium">{SHIPPING_COST.toFixed(2)} TL</span>
+                </div>
+                <div className="flex justify-between text-green-600">
+                  <span>İndirim ({DISCOUNT_PERCENTAGE}%):</span>
+                  <span className="font-medium">-{discount.toFixed(2)} TL</span>
+                </div>
+                <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
+                  <span>Toplam:</span>
+                  <span>{grandTotal.toFixed(2)} TL</span>
+                </div>
               </div>
-              
-              <Button
-                onClick={handleViewCart}
-                className="w-full bg-gray-900 text-white hover:bg-gray-800 cursor-pointer"
-              >
-                Sepete Git
-              </Button>
+
+              <div className="mt-4 space-y-2">
+                <Button
+                  className="w-full"
+                  onClick={handleCreateOrder}
+                  disabled={items.length === 0 || !items.some(item => item.checked)}
+                >
+                  Sipariş Oluştur
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleViewCart}
+                >
+                  Sepete Git
+                </Button>
+              </div>
             </div>
           </>
         )}

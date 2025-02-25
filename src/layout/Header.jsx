@@ -11,16 +11,16 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+} from "../components/ui/navigation-menu";
+import { Button } from "../components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "../components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import CartDropdown from '../components/CartDropdown';
+} from "../components/ui/dropdown-menu";
+import CartDropdown from "../components/CartDropdown";
 
 const Header = memo(() => {
   const { isAuthenticated, user, logout } = useAuthStore();
