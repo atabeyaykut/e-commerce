@@ -57,7 +57,7 @@ export const setFilter = (filter) => ({
   payload: filter
 });
 
-// New Redux Toolkit Thunk Action
+// New Redux Toolkit Thunk Actions
 export const fetchProductsAsync = createAsyncThunk(
   'products/fetchProducts',
   async (params = {}, { rejectWithValue }) => {
@@ -83,6 +83,21 @@ export const fetchProductsAsync = createAsyncThunk(
       return rejectWithValue(
         error.response?.data?.message || 
         'Failed to fetch products. Please try again later.'
+      );
+    }
+  }
+);
+
+export const fetchCategoriesAsync = createAsyncThunk(
+  'products/fetchCategories',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get('https://workintech-fe-ecommerce.onrender.com/categories');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 
+        'Failed to fetch categories. Please try again later.'
       );
     }
   }

@@ -2,130 +2,68 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Grid, List, Filter, Search } from 'lucide-react';
-import { fetchProductsAsync } from '../actions/productActions';
-import { setFilter, setSort, setCategory, clearFilters } from '../store/productsSlice';
-import ProductCard from '../components/ProductCard';
-import ShopProductGrid from '../components/ecommerce/ShopProductGrid';
-import PageHeader from '../components/ui/PageHeader';
-import BrandLogos from '../components/ui/BrandLogos';
-import debounce from 'lodash/debounce';
 import { motion } from 'framer-motion';
-
-const API_URL = 'https://workintech-fe-ecommerce.onrender.com';
-
-const SORT_OPTIONS = [
-  { value: '', label: 'Default Sorting' },
-  { value: 'price:asc', label: 'Price: Low to High' },
-  { value: 'price:desc', label: 'Price: High to Low' },
-  { value: 'rating:asc', label: 'Rating: Low to High' },
-  { value: 'rating:desc', label: 'Rating: High to Low' }
-];
-
-const categories = [
-  {
-    "id": 1,
-    "title": "Tişört",
-    "img": `${API_URL}/assets/category-img/category_kadın_tişört.jpg`,
-  },
-  {
-    "id": 2,
-    "title": "Ayakkabı",
-    "img": `${API_URL}/assets/category-img/category_kadın_ayakkabı.jpg`,
-  },
-  {
-    "id": 3,
-    "title": "Ceket",
-    "img": `${API_URL}/assets/category-img/category_kadın_ceket.jpg`,
-  },
-  {
-    "id": 4,
-    "title": "Elbise",
-    "img": `${API_URL}/assets/category-img/category_kadın_elbise.jpg`,
-  },
-  {
-    "id": 5,
-    "title": "Etek",
-    "img": `${API_URL}/assets/category-img/category_kadın_etek.jpg`,
-  },
-  {
-    "id": 6,
-    "title": "Gömlek",
-    "img": `${API_URL}/assets/category-img/category_kadın_gömlek.jpg`,
-  },
-  {
-    "id": 7,
-    "title": "Kazak",
-    "img": `${API_URL}/assets/category-img/category_kadın_kazak.jpg`,
-  },
-  {
-    "id": 8,
-    "title": "Pantalon",
-    "img": `${API_URL}/assets/category-img/category_kadın_pantalon.jpg`,
-  }
-];
+import { fetchProductsAsync, fetchCategoriesAsync } from '../actions/productActions';
+import { setFilters } from '../store/slices/productSlice';
+import ProductCard from '../components/ProductCard';
+import PageHeader from '../components/PageHeader';
+import { Input } from '../components/ui/input';
+import debounce from 'lodash/debounce';
 
 const PRODUCTS_PER_PAGE = 20;
 
 const ShopPage = () => {
-  const history = useHistory();
   const dispatch = useDispatch();
+  const history = useHistory();
   const params = useParams();
   const location = useLocation();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
-  const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
   const [showFilters, setShowFilters] = useState(false);
 
   const {
     products,
-    isLoading: productsLoading,
+    loading: productsLoading,
     error: productsError,
-    total,
-    queryParams
-  } = useSelector((state) => state.products);
+    categories,
+    categoriesLoading,
+    filters
+  } = useSelector((state) => state.product);
 
-  const getCategorySlug = (category) => {
-    if (category.slug) return category.slug;
-    return category.title
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[ğ]/g, 'g')
-      .replace(/[ü]/g, 'u')
-      .replace(/[ş]/g, 's')
-      .replace(/[ı]/g, 'i')
-      .replace(/[ö]/g, 'o')
-      .replace(/[ç]/g, 'c')
-      .replace(/[^a-z0-9-]/g, '');
-  };
+  // Get unique categories by combining same gender categories
+  const uniqueCategories = useMemo(() => {
+    if (!categories) return [];
 
-  // Update category when URL changes
-  useEffect(() => {
-    const { categoryId, gender, categoryName } = params;
-    if (categoryId) {
-      const selectedCategory = categories.find(cat => cat.id === Number(categoryId));
-      if (selectedCategory) {
-        dispatch(setCategory(categoryId));
+    const categoryMap = new Map();
 
-        // Check if we need to redirect
-        const currentSlug = getCategorySlug(selectedCategory);
-        const currentGender = gender === 'men' ? 'erkek' : (gender === 'women' ? 'kadin' : gender);
-
-        if (gender === 'men' || gender === 'women' || categoryName !== currentSlug) {
-          history.replace(`/shop/${currentGender}/${currentSlug}/${categoryId}`);
-        }
+    categories.forEach(category => {
+      const key = category.title.toLowerCase();
+      if (!categoryMap.has(key)) {
+        categoryMap.set(key, {
+          ...category,
+          genders: [category.gender]
+        });
       } else {
-        // If category not found, redirect to shop page
-        history.replace('/shop');
+        const existing = categoryMap.get(key);
+        if (!existing.genders.includes(category.gender)) {
+          existing.genders.push(category.gender);
+        }
       }
-    }
-  }, [params, history, dispatch]);
+    });
+
+    return Array.from(categoryMap.values());
+  }, [categories]);
 
   // Debounced search handler
-  const debouncedSearch = debounce((value) => {
-    dispatch(setFilter(value));
-  }, 500);
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((value) => {
+        dispatch(setFilters({ ...filters, search: value }));
+      }, 500),
+    [dispatch, filters]
+  );
 
   // Handle search input change
   const handleSearchChange = (e) => {
@@ -134,15 +72,30 @@ const ShopPage = () => {
     debouncedSearch(value);
   };
 
-  // Handle sort change
-  const handleSortChange = (e) => {
-    dispatch(setSort(e.target.value));
+  const handleCategoryClick = (category) => {
+    const filter = {
+      category: category.id,
+      gender: category.genders
+    };
+    dispatch(setFilters(filter));
+
+    // Update URL
+    const genderPath = category.genders.length > 1 ? 'unisex' : category.genders[0];
+    history.push(`/shop/${genderPath}/${category.title.toLowerCase()}/${category.id}`);
   };
 
-  // Fetch products when query params change
+  // Initial load of products and categories
   useEffect(() => {
-    dispatch(fetchProductsAsync(queryParams));
-  }, [dispatch, queryParams]);
+    dispatch(fetchProductsAsync());
+    dispatch(fetchCategoriesAsync());
+  }, [dispatch]);
+
+  // Update products when filters change
+  useEffect(() => {
+    if (filters) {
+      dispatch(fetchProductsAsync(filters));
+    }
+  }, [dispatch, filters]);
 
   const breadcrumbs = [
     { label: 'Home', link: '/' },
@@ -150,173 +103,129 @@ const ShopPage = () => {
   ];
 
   if (params.gender) {
-    breadcrumbs.push({
-      label: params.gender === 'kadin' ? 'Kadın' : 'Erkek',
-      link: `/shop/${params.gender}`
-    });
+    breadcrumbs.push({ label: params.gender, link: `/shop/${params.gender}` });
   }
-
-  const currentCategory = categories.find(cat => cat.id === Number(params.categoryId));
-
-  if (currentCategory) {
-    breadcrumbs.push({
-      label: currentCategory.title,
-      link: `/shop/${params.gender}/${getCategorySlug(currentCategory)}/${currentCategory.id}`
-    });
-  }
-
-  const handleCategoryClick = (cat) => {
-    const targetGender = params.gender || 'kadin';
-    const targetSlug = getCategorySlug(cat);
-    history.push(`/shop/${targetGender}/${targetSlug}/${cat.id}`);
-  };
-
-  // Pagination calculation
-  const paginationRange = useMemo(() => {
-    const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE);
-    const pageNumbers = [];
-
-    if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) pageNumbers.push(i);
-        pageNumbers.push('...');
-        pageNumbers.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pageNumbers.push(1);
-        pageNumbers.push('...');
-        for (let i = totalPages - 3; i <= totalPages; i++) pageNumbers.push(i);
-      } else {
-        pageNumbers.push(1);
-        pageNumbers.push('...');
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) pageNumbers.push(i);
-        pageNumbers.push('...');
-        pageNumbers.push(totalPages);
-      }
-    }
-
-    return pageNumbers;
-  }, [currentPage, products.length]);
 
   // Calculate current page products
-  const currentProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-    const endIndex = startIndex + PRODUCTS_PER_PAGE;
-    return products.slice(startIndex, endIndex);
-  }, [currentPage, products]);
+  const indexOfLastProduct = currentPage * PRODUCTS_PER_PAGE;
+  const indexOfFirstProduct = indexOfLastProduct - PRODUCTS_PER_PAGE;
+  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  // Calculate pagination range
+  const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE);
+  const paginationRange = [];
+  for (let i = 1; i <= totalPages; i++) {
+    if (
+      i === 1 ||
+      i === totalPages ||
+      (i >= currentPage - 1 && i <= currentPage + 1)
+    ) {
+      paginationRange.push(i);
+    } else if (i === currentPage - 2 || i === currentPage + 2) {
+      paginationRange.push('...');
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <PageHeader
-        title={currentCategory ? currentCategory.title : 'Shop'}
+        title={filters?.category ? uniqueCategories.find(c => c.id === filters.category)?.title || 'Shop' : 'Shop'}
         breadcrumbs={breadcrumbs}
       />
 
       {/* Categories Grid */}
-      <div className="flex flex-wrap justify-center gap-8 max-w-9/11 mx-auto px-4">
-        {categories.map((category) => (
-          <motion.div
-            key={category.id}
-            className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md min-h-[220px] min-w-[200px] w-1/2 md:w-1/5"
-            onClick={() => handleCategoryClick(category)}
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="absolute inset-0 bg-black opacity-40 group-hover:opacity-30 transition-opacity z-10" />
-            <img
-              src={category.img}
-              alt={category.title}
-              className="absolute inset-0 w-full h-full object-cover"
-              onError={(e) => {
-                e.target.src = `${API_URL}/assets/category-img/default.jpg`;
-              }}
-            />
-            <div className="absolute inset-0 flex items-center justify-center z-20">
-              <h3 className="text-white text-2xl font-semibold text-center">
-                {category.title}
-              </h3>
-            </div>
-          </motion.div>
-        ))}
+      <div className="flex flex-wrap justify-center gap-4 max-w-7xl mx-auto px-4 py-8">
+        {categoriesLoading ? (
+          <div className="flex justify-center w-full py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+          </div>
+        ) : (
+          uniqueCategories.map((category) => (
+            <motion.div
+              key={category.id}
+              className="relative overflow-hidden rounded-lg shadow-lg cursor-pointer w-full sm:w-[calc(50%-1rem)] md:w-[calc(33.33%-1rem)] lg:w-[calc(25%-1rem)] aspect-[4/3]"
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => handleCategoryClick(category)}
+            >
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 hover:scale-110"
+                style={{ backgroundImage: `url(${category.img})` }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+              <div className="absolute h-full flex items-center justify-center p-4 w-full">
+                <h3 className="text-white  text-xl font-bold mb-1">
+                  {category.title}
+                </h3>
+              </div>
+            </motion.div>
+          ))
+        )}
       </div>
 
-      {/* Filters Bar */}
-      <div className=" max-w-7xl mx-auto px-4 py-6">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-lg shadow">
-          {/* View Mode and Filter Buttons */}
-          <div className="flex items-center space-x-4">
-            <button
-              className={`p-2 ${viewMode === 'grid' ? 'text-primary' : 'text-gray-500'}`}
-              onClick={() => setViewMode('grid')}
-            >
-              <Grid size={20} />
-            </button>
-            <button
-              className={`p-2 ${viewMode === 'list' ? 'text-primary' : 'text-gray-500'}`}
-              onClick={() => setViewMode('list')}
-            >
-              <List size={20} />
-            </button>
-          </div>
-
-          {/* Search Input */}
-          <div className="flex-1 max-w-md">
+      {/* Search and Filter Bar */}
+      <div className="w-full mx-auto p-4">
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-evenly p-6">
+          <div className="w-full sm:w-96">
             <div className="relative">
-              <input
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
                 type="text"
                 placeholder="Search products..."
                 value={searchInput}
                 onChange={handleSearchChange}
-                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="pl-10 w-full"
               />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             </div>
           </div>
-
-          {/* Sort Select */}
-          <div className="w-full md:w-auto">
-            <select
-              value={queryParams.sort}
-              onChange={handleSortChange}
-              className="w-full md:w-auto px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
             >
-              {SORT_OPTIONS.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              <Filter className="h-4 w-4" />
+              Filters
+            </button>
+            <div className="flex items-center gap-2 border border-gray-300 rounded-md">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 ${viewMode === 'grid' ? 'text-primary' : 'text-gray-400'}`}
+              >
+                <Grid className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 ${viewMode === 'list' ? 'text-primary' : 'text-gray-400'}`}
+              >
+                <List className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Products Grid */}
-      <div className="max-w-7xl  mx-auto px-4 py-8">
-        {productsError && (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {productsError ? (
           <div className="text-center text-red-600 mb-4">
             {productsError}
           </div>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {productsLoading ? (
-            <div className="flex justify-center items-center min-h-[400px]">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-          ) : products.length === 0 ? (
-            <div className="text-center py-12">
-              <h3 className="text-xl font-semibold text-gray-700">Ürün bulunamadı</h3>
-              <p className="text-gray-500 mt-2">Lütfen farklı bir arama yapmayı deneyin</p>
-            </div>
-          ) : (
-            currentProducts.map((product) => (
+        ) : productsLoading ? (
+          <div className="flex justify-center items-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-12">
+            <h3 className="text-xl font-semibold text-gray-700">Ürün bulunamadı</h3>
+            <p className="text-gray-500 mt-2">Lütfen farklı bir kategori seçin</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {currentProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Pagination */}
         {!productsLoading && products.length > PRODUCTS_PER_PAGE && (
@@ -379,8 +288,6 @@ const ShopPage = () => {
           </div>
         )}
       </div>
-
-      <BrandLogos />
     </div>
   );
 };
