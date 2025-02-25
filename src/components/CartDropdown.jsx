@@ -4,6 +4,7 @@ import { useHistory } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { removeFromCart } from '../store/slices/cartSlice';
+import { API_URL } from '../config/api';
 
 const CartDropdown = () => {
   const dispatch = useDispatch();
@@ -34,9 +35,12 @@ const CartDropdown = () => {
                 <div key={item.product.id} className="flex gap-4 py-2">
                   <div className="w-20 h-20 flex-shrink-0">
                     <img
-                      src={item.product.images[0]?.url}
+                      src={item.product.images?.[0]?.url || `${API_URL}/assets/default-product.jpg`}
                       alt={item.product.name}
                       className="w-full h-full object-cover rounded"
+                      onError={(e) => {
+                        e.target.src = `${API_URL}/assets/default-product.jpg`;
+                      }}
                     />
                   </div>
                   <div className="flex-1 min-w-0">
