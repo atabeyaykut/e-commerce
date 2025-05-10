@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { fetchProductsAsync, fetchCategoriesAsync } from '../../actions/productActions';
 
 const initialState = {
   selectedProduct: null,
@@ -6,6 +7,8 @@ const initialState = {
   error: null,
   products: [],
   categories: [],
+  categoriesLoading: false,
+  categoriesError: null,
   filters: {
     category: null,
     priceRange: null,
@@ -17,29 +20,9 @@ const productSlice = createSlice({
   name: 'product',
   initialState,
   reducers: {
-    fetchProductStart: (state) => {
-      state.loading = true;
-      state.error = null;
-    },
-    fetchProductSuccess: (state, action) => {
-      state.selectedProduct = action.payload;
-      state.loading = false;
-      state.error = null;
-    },
-    fetchProductFailure: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-      state.selectedProduct = null;
-    },
     clearSelectedProduct: (state) => {
       state.selectedProduct = null;
       state.error = null;
-    },
-    setProducts: (state, action) => {
-      state.products = action.payload;
-    },
-    setCategories: (state, action) => {
-      state.categories = action.payload;
     },
     setFilters: (state, action) => {
       state.filters = { ...state.filters, ...action.payload };
@@ -47,16 +30,42 @@ const productSlice = createSlice({
     clearFilters: (state) => {
       state.filters = initialState.filters;
     }
+  },
+  extraReducers: (builder) => {
+    builder
+      // Handle products fetch
+      .addCase(fetchProductsAsync.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchProductsAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        state.products = action.payload.products;
+        state.error = null;
+      })
+      .addCase(fetchProductsAsync.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Handle categories fetch
+      .addCase(fetchCategoriesAsync.pending, (state) => {
+        state.categoriesLoading = true;
+        state.categoriesError = null;
+      })
+      .addCase(fetchCategoriesAsync.fulfilled, (state, action) => {
+        state.categoriesLoading = false;
+        state.categories = action.payload;
+        state.categoriesError = null;
+      })
+      .addCase(fetchCategoriesAsync.rejected, (state, action) => {
+        state.categoriesLoading = false;
+        state.categoriesError = action.payload;
+      });
   }
 });
 
 export const {
-  fetchProductStart,
-  fetchProductSuccess,
-  fetchProductFailure,
   clearSelectedProduct,
-  setProducts,
-  setCategories,
   setFilters,
   clearFilters
 } = productSlice.actions;

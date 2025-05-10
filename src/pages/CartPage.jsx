@@ -169,7 +169,7 @@ function ShoppingCartPage() {
             <Button 
               className="mt-4 bg-orange-500 hover:bg-orange-600" 
               disabled={selectedItems.length === 0}
-              onClick={() => history.push('/checkout')}
+              onClick={() => history.push('/order')}
             >
               Seçilen Ürünleri Satın Al
             </Button>

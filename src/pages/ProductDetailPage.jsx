@@ -9,6 +9,7 @@ import { fetchProduct } from '../store/actions/productActions';
 import { clearSelectedProduct } from '../store/slices/productSlice';
 import { Button } from '../components/ui/button';
 import { addToCart } from '../store/slices/cartSlice';
+import { useToast } from '../hooks/useToast';
 
 const ProductDetailPage = ({ match }) => {
   const { productId } = match.params;
@@ -19,6 +20,7 @@ const ProductDetailPage = ({ match }) => {
 
   const history = useHistory();
   const dispatch = useDispatch();
+  const { toast } = useToast();
   const { selectedProduct, loading, error } = useSelector((state) => state.selectedProduct);
 
   useEffect(() => {
@@ -57,7 +59,11 @@ const ProductDetailPage = ({ match }) => {
 
   const handleAddToCart = () => {
     if (!selectedSize && selectedProduct.sizes?.length > 0) {
-      alert("Lütfen bir beden seçin");
+      toast({
+        title: "Hata",
+        description: "Lütfen bir beden seçin",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -66,7 +72,15 @@ const ProductDetailPage = ({ match }) => {
       size: selectedSize
     };
 
-    dispatch(addToCart(productToAdd));
+    for (let i = 0; i < quantity; i++) {
+      dispatch(addToCart(productToAdd));
+    }
+
+    toast({
+      title: "Başarılı",
+      description: `${quantity} adet ürün sepete eklendi`,
+      variant: "success",
+    });
   };
 
   if (loading) {
